@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import CoreData
 
 // MARK: - TimerView
 /// 타이머 화면을 구성하고 시간 설정 및 카운트다운을 처리하는 뷰 컨트롤러
@@ -34,11 +35,20 @@ class TimerView: UIViewController {
     /// 시작/일시정지 버튼
     private let playPauseButton = UIButton()
     
+    /// 타이머 레이블 입력 텍스트필드
+    private let labelTextField = UITextField()
+    
     /// 최근 항목 레이블
     private let recentLabel = UILabel()
     
     /// 최근 타이머 목록을 표시할 테이블뷰
     private let recentTableView = UITableView()
+    
+    /// 저장된 타이머 목록
+    private var timerItems: [TimerItem] = []
+    
+    /// 코어데이터 매니저
+    private let timerCoreDataManager = TimerCoreDataManager.shared
     
     /// 타이머 시간 값
     private var hours: Int = 0
@@ -53,6 +63,12 @@ class TimerView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        loadTimers()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadTimers()
     }
     
     // MARK: - UI Configuration
@@ -88,6 +104,26 @@ class TimerView: UIViewController {
         setupTimeButton(minuteButton, title: "분 +")
         setupTimeButton(secondButton, title: "초 +")
         
+        // 레이블 입력 텍스트필드 설정
+        labelTextField.placeholder = "타이머명"
+        labelTextField.attributedPlaceholder = NSAttributedString(
+            string: "타이머명",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray]
+        )
+        labelTextField.textColor = .white
+        labelTextField.textAlignment = .center
+        labelTextField.font = .systemFont(ofSize: 16)
+        labelTextField.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        labelTextField.layer.cornerRadius = 8
+        labelTextField.clipsToBounds = true
+        
+        // 텍스트필드 패딩 설정
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: labelTextField.frame.height))
+        labelTextField.leftView = paddingView
+        labelTextField.leftViewMode = .always
+        labelTextField.rightView = paddingView
+        labelTextField.rightViewMode = .always
+        
         // 컨트롤 버튼 설정
         setupControlButton(resetButton, systemName: "arrow.counterclockwise")
         setupControlButton(playPauseButton, systemName: "play.fill")
@@ -100,7 +136,7 @@ class TimerView: UIViewController {
         
         // 뷰에 컴포넌트 추가
         [titleLabel, timerLabel, hourButton, minuteButton, secondButton,
-         resetButton, playPauseButton, recentLabel, recentTableView].forEach {
+         labelTextField, resetButton, playPauseButton, recentLabel, recentTableView].forEach {
             view.addSubview($0)
         }
     }
@@ -175,8 +211,15 @@ class TimerView: UIViewController {
             make.width.height.equalTo(hourButton)
         }
         
+        labelTextField.snp.makeConstraints { make in
+            make.top.equalTo(hourButton.snp.bottom).offset(20)
+            make.centerX.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+        
         resetButton.snp.makeConstraints { make in
-            make.top.equalTo(hourButton.snp.bottom).offset(40)
+            make.top.equalTo(labelTextField.snp.bottom).offset(20)
             make.trailing.equalTo(view.snp.centerX).offset(-20)
             make.width.height.equalTo(70)
         }
@@ -217,10 +260,11 @@ class TimerView: UIViewController {
     
     @objc private func resetButtonTapped() {
         stopTimer()
-        hours = 0
-        minutes = 0
-        seconds = 0
+        hours = 0  // 시간 초기화
+        minutes = 0  // 분 초기화
+        seconds = 0  // 초 초기화
         updateTimerLabel()
+        labelTextField.text = ""  // 텍스트필드 초기화
         playPauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
     }
     
@@ -236,6 +280,11 @@ class TimerView: UIViewController {
     private func startTimer() {
         guard timer == nil else { return }
         if hours == 0 && minutes == 0 && seconds == 0 { return }
+        
+        // 타이머 시작 시 저장
+        if let timerName = labelTextField.text, !timerName.isEmpty {
+            saveTimer()
+        }
         
         isRunning = true
         playPauseButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
@@ -276,9 +325,28 @@ class TimerView: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
+// MARK: - Core Data Methods
+extension TimerView {
+    private func saveTimer() {
+        guard let name = labelTextField.text, !name.isEmpty else { return }
+        
+        timerCoreDataManager.saveTimer(name: name,
+                                hours: hours,
+                                minutes: minutes,
+                                seconds: seconds)
+        loadTimers()
+    }
+    
+    private func loadTimers() {
+        timerItems = timerCoreDataManager.fetchTimers()
+        recentTableView.reloadData()
+    }
+}
+
+// MARK: - UITableViewDelegate, UITableViewDataSource
 extension TimerView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4 // 최근 타이머 항목 개수
+        return timerItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -286,11 +354,13 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.textLabel?.textColor = .white
         
-        // 샘플 데이터
-        let times = ["라면", "명상", "운동", "스터디"]
-        let durations = ["00:03:00", "00:10:00", "00:30:00", "01:00:00"]
+        let timerItem = timerItems[indexPath.row]
+        let duration = String(format: "%02d:%02d:%02d",
+                            timerItem.hours,
+                            timerItem.minutes,
+                            timerItem.seconds)
         
-        cell.textLabel?.text = "\(times[indexPath.row])     \(durations[indexPath.row])"
+        cell.textLabel?.text = "\(timerItem.name ?? "Unknown")     \(duration)"
         
         return cell
     }
@@ -299,5 +369,26 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
 // MARK: - SwiftUI Preview
 @available(iOS 17.0, *)
 #Preview {
-    TimerView()
+    let viewController = TimerView()
+    let navigationController = UINavigationController(rootViewController: viewController)
+    
+    // Preview용 CoreData 설정
+    let momName = "Timer"
+    let model = NSManagedObjectModel.mergedModel(from: [Bundle.main])!
+    let container = NSPersistentContainer(name: momName, managedObjectModel: model)
+    
+    let description = NSPersistentStoreDescription()
+    description.type = NSInMemoryStoreType
+    description.shouldAddStoreAsynchronously = false
+    container.persistentStoreDescriptions = [description]
+    
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
+    }
+    
+    TimerCoreDataManager.shared.persistentContainer = container
+    
+    return navigationController
 }
