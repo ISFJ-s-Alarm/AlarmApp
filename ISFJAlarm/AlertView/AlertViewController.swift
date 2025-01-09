@@ -63,14 +63,14 @@ class AlertViewController: UIViewController {
     // 현재 시간 표시를 위한 UILabel 설정
         func setupTimeLabel() {
             timeLabel.textColor = .white
-            timeLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+            timeLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
             timeLabel.textAlignment = .center
             timeLabel.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(timeLabel)
 
             NSLayoutConstraint.activate([
                 timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -200) // 화면 중앙보다 위로 100포인트
+                timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -250) // 화면 중앙보다 위로 100포인트
             ])
 
             // 타이머 시작
@@ -106,7 +106,7 @@ class AlertViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             snoozeButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            snoozeButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 180), // 버튼 위치 조정
+            snoozeButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 200), // 버튼 위치 조정
             snoozeButton.widthAnchor.constraint(equalToConstant: 150),
             snoozeButton.heightAnchor.constraint(equalToConstant: 50)
         ])
