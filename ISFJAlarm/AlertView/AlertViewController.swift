@@ -19,7 +19,7 @@ class AlertViewController: UIViewController {
         setupDismissButton()
     }
 
-    // 배경 동영상 설정 (에셋에서 불러오기)
+    // 배경 동영상 설정 (에셋에서 불러오기 + 반복 재생)
     func setupVideoBackground() {
         guard let asset = NSDataAsset(name: "morning1") else {
             print("에셋에서 'morning' 동영상을 찾을 수 없습니다.")
@@ -40,6 +40,15 @@ class AlertViewController: UIViewController {
         playerLayer.videoGravity = .resizeAspectFill
         view.layer.addSublayer(playerLayer)
 
+        // 반복 재생 설정
+        NotificationCenter.default.addObserver(self, selector: #selector(loopVideo), name: .AVPlayerItemDidPlayToEndTime, object: player?.currentItem)
+
+        player?.play()
+    }
+
+    // 동영상 반복 재생을 위한 메서드
+    @objc func loopVideo() {
+        player?.seek(to: .zero)
         player?.play()
     }
 
@@ -98,6 +107,10 @@ class AlertViewController: UIViewController {
     @objc func stopAlarm() {
         print("중단 버튼 클릭됨!")
         player?.pause()
+
+        // 반복 재생을 멈추기 위해 NotificationCenter에서 제거
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: player?.currentItem)
+        
         dismiss(animated: true, completion: nil)
     }
 }
