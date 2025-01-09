@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 class CustomTabBarController: UIViewController {
-    private let tabBarView = CustomTabBarView(titles: ["알람", "스톱워치", "타이머", "세계시계"])
+    private let tabBarView = CustomTabBarView()
     private let viewModel = TabBarViewModel()
 
     override func viewDidLoad() {
@@ -24,8 +24,8 @@ class CustomTabBarController: UIViewController {
         view.addSubview(tabBarView)
 
         tabBarView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
             $0.height.equalTo(60)
         }
     }
@@ -41,6 +41,7 @@ class CustomTabBarController: UIViewController {
     }
 
     private func handleTabChange(_ index: Int) {
-
+        print("Selected Tab Index: \(index)")
+        // 선택된 탭에 따라 화면 전환 추가 가능
     }
 }
