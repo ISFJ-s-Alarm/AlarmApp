@@ -33,6 +33,18 @@ class TimerViewModel {
         seconds = (seconds + 1) % 60
     }
     
+    func decrementHours() {
+        hours = hours > 0 ? hours - 1 : 23
+    }
+
+    func decrementMinutes() {
+        minutes = minutes > 0 ? minutes - 1 : 59
+    }
+
+    func decrementSeconds() {
+        seconds = seconds > 0 ? seconds - 1 : 59
+    }
+    
     func startTimer() {
         guard timer == nil, (hours > 0 || minutes > 0 || seconds > 0) else { return }
         
@@ -55,6 +67,12 @@ class TimerViewModel {
         seconds = 0
     }
     
+    func setTimer(hours: Int, minutes: Int, seconds: Int) {
+        self.hours = hours
+        self.minutes = minutes
+        self.seconds = seconds
+    }
+    
     private func updateTimer() {
         if seconds > 0 {
             seconds -= 1
@@ -70,6 +88,8 @@ class TimerViewModel {
             // TODO: 타이머 종료 알림 추가
         }
     }
+    
+    
     
     // MARK: - Data Operations
     func saveTimer(name: String) {
