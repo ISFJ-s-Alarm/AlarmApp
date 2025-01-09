@@ -20,7 +20,7 @@ class AlertViewController: UIViewController {
     // 배경 동영상 설정 (에셋에서 불러오기)
     func setupVideoBackground() {
         // 에셋에서 동영상 데이터를 가져옵니다.
-        guard let asset = NSDataAsset(name: "morning") else {
+        guard let asset = NSDataAsset(name: "morning1") else {
             print("에셋에서 'morning' 동영상을 찾을 수 없습니다.")
             return
         }
