@@ -22,7 +22,9 @@ class TimerView: UIViewController {
     private let secondButton = UIButton()
     private let resetButton = UIButton()
     private let playPauseButton = UIButton()
-    private let labelTextField = UITextField()
+    private let labelContainerView = UIView()
+    private let labelTextLabel = UILabel()
+    private let nameTextField = UITextField()
     private let timerEndButton = UIButton()
     private let recentLabel = UILabel()
     private let recentTableView = UITableView()
@@ -75,7 +77,6 @@ class TimerView: UIViewController {
     }
 
     private func setupComponents() {
-
         // 타이머 레이블 설정
         timerLabel.text = "00:00:00"
         timerLabel.font = .systemFont(ofSize: 80, weight: .regular)
@@ -92,12 +93,40 @@ class TimerView: UIViewController {
         setupTimeButton(minuteMinusButton, title: "분 -")
         setupTimeButton(secondMinusButton, title: "초 -")
 
+        // 레이블 컨테이너 설정
+        labelContainerView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        labelContainerView.layer.cornerRadius = 8
+        labelContainerView.clipsToBounds = true
+
+        // 레이블 텍스트 설정
+        labelTextLabel.text = "레이블"
+        labelTextLabel.textColor = .white
+        labelTextLabel.font = .systemFont(ofSize: 16)
+
+        // 우측 텍스트필드 설정
+        nameTextField.textColor = .white
+        nameTextField.font = .systemFont(ofSize: 16)
+        nameTextField.backgroundColor = .clear
+        nameTextField.textAlignment = .right
+        nameTextField.placeholder = "타이머" // placeholder 추가
+        nameTextField.attributedPlaceholder = NSAttributedString(
+            string: "타이머",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray]
+        )
+
+        // 텍스트필드 패딩 설정
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: nameTextField.frame.height))
+        nameTextField.leftView = paddingView
+        nameTextField.leftViewMode = .always
+
         // 타이머 종료 시 버튼 설정
         timerEndButton.setTitle("타이머 종료 시", for: .normal)
         timerEndButton.setTitleColor(.white, for: .normal)
         timerEndButton.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         timerEndButton.layer.cornerRadius = 8
         timerEndButton.titleLabel?.font = .systemFont(ofSize: 16)
+        timerEndButton.contentHorizontalAlignment = .left
+        timerEndButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
 
         // 컨트롤 버튼 설정
         setupControlButton(resetButton, systemName: "arrow.counterclockwise")
@@ -109,44 +138,19 @@ class TimerView: UIViewController {
         recentLabel.font = .systemFont(ofSize: 20, weight: .bold)
         recentLabel.textColor = .white
 
-        // 레이블 입력 텍스트필드 설정
-        labelTextField.placeholder = "레이블"
-        labelTextField.attributedPlaceholder = NSAttributedString(
-            string: "레이블",
-            attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray]
-        )
-        labelTextField.textColor = .white
-        labelTextField.textAlignment = .left
-        labelTextField.font = .systemFont(ofSize: 16)
-        labelTextField.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
-        labelTextField.layer.cornerRadius = 8
-        labelTextField.clipsToBounds = true
-
-        // 텍스트필드 패딩 설정
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: labelTextField.frame.height))
-        labelTextField.leftView = paddingView
-        labelTextField.leftViewMode = .always
-
-        // 타이머 종료 시 버튼 설정
-        timerEndButton.setTitle("타이머 종료 시", for: .normal)
-        timerEndButton.setTitleColor(.white, for: .normal)
-        timerEndButton.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
-        timerEndButton.layer.cornerRadius = 8
-        timerEndButton.titleLabel?.font = .systemFont(ofSize: 16)
-        timerEndButton.contentHorizontalAlignment = .left
-        timerEndButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
-
-        // 뷰에 컴포넌트 추가
+        // 컴포넌트 추가
         [timerLabel,
          hourButton, minuteButton, secondButton,
          hourMinusButton, minuteMinusButton, secondMinusButton,
-         labelTextField, resetButton, playPauseButton,
-         recentLabel, recentTableView, timerEndButton].forEach {
+         labelContainerView,
+         resetButton, playPauseButton, recentLabel, recentTableView, timerEndButton].forEach {
             view.addSubview($0)
         }
+
+        labelContainerView.addSubview(labelTextLabel)
+        labelContainerView.addSubview(nameTextField)
     }
 
-    // 버튼 기능 설정
     private func setupTimeButton(_ button: UIButton, title: String) {
         button.setTitle(title, for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -187,7 +191,6 @@ class TimerView: UIViewController {
 
     // MARK: - Auto Layout
     private func setupConstraints() {
-
         timerLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.centerX.equalToSuperview()
@@ -231,6 +234,37 @@ class TimerView: UIViewController {
             make.width.height.equalTo(hourMinusButton)
         }
 
+        labelContainerView.snp.makeConstraints { make in
+            make.top.equalTo(hourMinusButton.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+
+        labelTextLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(15)
+            make.centerY.equalToSuperview()
+        }
+
+        nameTextField.snp.makeConstraints { make in
+            make.leading.equalTo(labelTextLabel.snp.trailing).offset(10)
+            make.trailing.equalToSuperview().offset(-15)
+            make.centerY.equalToSuperview()
+            make.height.equalTo(40)
+            make.width.greaterThanOrEqualTo(100) // 최소 너비 설정
+        }
+
+        timerEndButton.snp.makeConstraints { make in
+            make.top.equalTo(labelContainerView.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+
+        resetButton.snp.makeConstraints { make in
+            make.top.equalTo(timerEndButton.snp.bottom).offset(20)
+            make.trailing.equalTo(view.snp.centerX).offset(-20)
+            make.width.height.equalTo(70)
+        }
+
         playPauseButton.snp.makeConstraints { make in
             make.top.equalTo(resetButton)
             make.leading.equalTo(view.snp.centerX).offset(20)
@@ -247,25 +281,6 @@ class TimerView: UIViewController {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
-        
-        labelTextField.snp.makeConstraints { make in
-            make.top.equalTo(hourMinusButton.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(40)
-        }
-
-        timerEndButton.snp.makeConstraints { make in
-            make.top.equalTo(labelTextField.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(40)
-        }
-
-        resetButton.snp.makeConstraints { make in
-            make.top.equalTo(timerEndButton.snp.bottom).offset(20)
-            make.trailing.equalTo(view.snp.centerX).offset(-20)
-            make.width.height.equalTo(70)
-        }
-
     }
 
     // MARK: - Button Actions
@@ -295,14 +310,14 @@ class TimerView: UIViewController {
 
     @objc private func resetButtonTapped() {
         viewModel.resetTimer()
-        labelTextField.text = ""
+        nameTextField.text = ""
     }
 
     @objc private func playPauseButtonTapped() {
         if viewModel.isRunning {
             viewModel.stopTimer()
         } else {
-            if let name = labelTextField.text, !name.isEmpty {
+            if let name = nameTextField.text, !name.isEmpty {
                 viewModel.saveTimer(name: name)
             }
             viewModel.startTimer()
@@ -338,7 +353,10 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
         viewModel.setTimer(hours: timer.hours,
                           minutes: timer.minutes,
                           seconds: timer.seconds)
-
+        
+        // 타이머 이름 설정 추가
+        nameTextField.text = timer.name
+        
         // 선택 효과 해제
         tableView.deselectRow(at: indexPath, animated: true)
     }
