@@ -13,19 +13,19 @@ class AlertViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black // 배경을 검은색으로 설정
+        view.backgroundColor = .black // 동영상이 나오기 전 검정 배경 화면 설정
         setupVideoBackground()
+        setupSnoozeButton()
+        setupDismissButton()
     }
 
     // 배경 동영상 설정 (에셋에서 불러오기)
     func setupVideoBackground() {
-        // 에셋에서 동영상 데이터를 가져옵니다.
         guard let asset = NSDataAsset(name: "morning1") else {
             print("에셋에서 'morning' 동영상을 찾을 수 없습니다.")
             return
         }
 
-        // 임시 디렉토리에 동영상을 저장합니다.
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("temp_video.mp4")
         do {
             try asset.data.write(to: tempURL)
@@ -34,16 +34,70 @@ class AlertViewController: UIViewController {
             return
         }
 
-        // AVPlayer로 동영상 재생
         player = AVPlayer(url: tempURL)
         let playerLayer = AVPlayerLayer(player: player)
         playerLayer.frame = view.bounds
         playerLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(playerLayer)
 
-        // 플레이어 레이어 추가
-        DispatchQueue.main.async {
-            self.view.layer.insertSublayer(playerLayer, at: 0)
-            self.player?.play()
-        }
+        player?.play()
+    }
+
+    // "다시 알림" 버튼 추가!
+    func setupSnoozeButton() {
+        let snoozeButton = UIButton()
+        snoozeButton.setTitle("다시 알림", for: .normal)
+        snoozeButton.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        snoozeButton.setTitleColor(.white, for: .normal)
+        snoozeButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        snoozeButton.layer.cornerRadius = 25
+        snoozeButton.translatesAutoresizingMaskIntoConstraints = false
+
+        snoozeButton.addTarget(self, action: #selector(snoozeAlarm), for: .touchUpInside)
+
+        view.addSubview(snoozeButton)
+
+        NSLayoutConstraint.activate([
+            snoozeButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            snoozeButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 180), // 버튼 위치 조정
+            snoozeButton.widthAnchor.constraint(equalToConstant: 150),
+            snoozeButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
+    // "중단" 버튼 추가!
+    func setupDismissButton() {
+        let dismissButton = UIButton()
+        dismissButton.setTitle("중단", for: .normal)
+        dismissButton.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        dismissButton.setTitleColor(.white, for: .normal)
+        dismissButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        dismissButton.layer.cornerRadius = 15
+        dismissButton.translatesAutoresizingMaskIntoConstraints = false
+
+        dismissButton.addTarget(self, action: #selector(stopAlarm), for: .touchUpInside)
+
+        view.addSubview(dismissButton)
+
+        NSLayoutConstraint.activate([
+            dismissButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            dismissButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -40),
+            dismissButton.widthAnchor.constraint(equalToConstant: 100),
+            dismissButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+
+    // "다시 알림" 버튼 동작
+    @objc func snoozeAlarm() {
+        print("다시 알림 버튼 클릭됨!")
+        dismiss(animated: true, completion: nil)
+        // 여기에 스누즈 알람 설정 로직 추가 가능
+    }
+
+    // "중단" 버튼 동작
+    @objc func stopAlarm() {
+        print("중단 버튼 클릭됨!")
+        player?.pause()
+        dismiss(animated: true, completion: nil)
     }
 }
