@@ -10,7 +10,7 @@ import SnapKit
 
 class AlarmEditorViewController: UIViewController {
     private let alarmEditView = AlarmEditorView()
-    private let viewModel = ViewModel()
+    private let viewModel = AlarmEditorViewModel()
     private var selectedDays: [Int] = []
     
     private var labelText: String?

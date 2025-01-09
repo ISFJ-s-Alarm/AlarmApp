@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ViewModel {
+class AlarmEditorViewModel {
     
     var updateUI: (() -> Void)?
     
