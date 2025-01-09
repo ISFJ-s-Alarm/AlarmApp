@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-class ModalTestVC: ViewController {
+class ModalTestVC: UIViewController {
     
     let label = UILabel().then {
         $0.text = "모달 띄우기 성공"
