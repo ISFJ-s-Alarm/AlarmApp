@@ -137,9 +137,15 @@ class TimerView: UIViewController {
         timerEndButton.contentHorizontalAlignment = .left
         timerEndButton.addTarget(self, action: #selector(timerEndButtonTapped), for: .touchUpInside)
         
+        // selectedMusicLabel 설정
         selectedMusicLabel.text = "무음"
         selectedMusicLabel.textColor = .gray
-        selectedMusicLabel.font = .systemFont(ofSize:14)
+        selectedMusicLabel.font = .systemFont(ofSize: 14)
+        selectedMusicLabel.isUserInteractionEnabled = true  // 터치 가능하도록 설정
+        
+        // 제스처 인식기 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(musicLabelTapped))
+        selectedMusicLabel.addGestureRecognizer(tapGesture)
         
         musicContainerView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         musicContainerView.layer.cornerRadius = 8
@@ -335,6 +341,16 @@ class TimerView: UIViewController {
         nameTextField.text = ""
     }
     
+    @objc private func musicLabelTapped() {
+        // 기존 timerEndButtonTapped와 동일한 동작 수행
+        presentMusicSelectViewController()
+    }
+
+    // 기존 timerEndButtonTapped 메서드를 리팩토링하여 재사용 가능하게 만듦
+    @objc private func timerEndButtonTapped() {
+        presentMusicSelectViewController()
+    }
+    
     @objc private func playPauseButtonTapped() {
         if viewModel.hours == 0 && viewModel.minutes == 0 && viewModel.seconds == 0 {
             return
@@ -347,7 +363,8 @@ class TimerView: UIViewController {
         }
     }
     
-    @objc private func timerEndButtonTapped() {
+    // 공통 기능을 별도 메서드로 분리
+    private func presentMusicSelectViewController() {
         let musicVC = MusicSelectViewController()
         musicVC.delegate = self
         musicVC.modalPresentationStyle = .pageSheet
