@@ -26,7 +26,6 @@ class AlarmCoreDataManager {
         
         do {
             try context.save()
-            print("Alarm successfully created!")
             return alarm
         } catch {
             print("Failed to create alarm: \(error)")
@@ -71,7 +70,6 @@ class AlarmCoreDataManager {
         
         do {
             try context.save()
-            print("Alarm successfully updated!")
         } catch {
             print("Failed to update alarm: \(error)")
         }
@@ -83,7 +81,6 @@ class AlarmCoreDataManager {
         
         do {
             try context.save()
-            print("Alarm successfully deleted!")
         } catch {
             print("Failed to delete alarm: \(error)")
         }
