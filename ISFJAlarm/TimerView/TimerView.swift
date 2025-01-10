@@ -61,6 +61,15 @@ class TimerView: UIViewController {
                 self?.timerLabel.text = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
             }
             .store(in: &cancellables)
+        
+        viewModel.$timerItems
+            .receive(on: DispatchQueue.main)  // 메인 스레드에서 받기 보장
+            .sink { [weak self] items in
+                print("테이블뷰 리로드 시작: \(items.count)개 항목")
+                self?.recentTableView.reloadData()
+                print("테이블뷰 리로드 완료")
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - UI Configuration
@@ -282,49 +291,50 @@ class TimerView: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
-
+    
     // MARK: - Button Actions
     @objc private func hourButtonTapped() {
         viewModel.incrementHours()
     }
-
+    
     @objc private func minuteButtonTapped() {
         viewModel.incrementMinutes()
     }
-
+    
     @objc private func secondButtonTapped() {
         viewModel.incrementSeconds()
     }
-
+    
     @objc private func hourMinusButtonTapped() {
         viewModel.decrementHours()
     }
-
+    
     @objc private func minuteMinusButtonTapped() {
         viewModel.decrementMinutes()
     }
-
+    
     @objc private func secondMinusButtonTapped() {
         viewModel.decrementSeconds()
     }
-
+    
     @objc private func resetButtonTapped() {
         viewModel.resetTimer()
         nameTextField.text = ""
     }
-
+    
     @objc private func playPauseButtonTapped() {
-        if viewModel.isRunning {
-            viewModel.stopTimer()
+        if viewModel.hours == 0 && viewModel.minutes == 0 && viewModel.seconds == 0 {
+            return
+        }
+        if !viewModel.isRunning {
+            let name = nameTextField.text?.isEmpty == true ? "타이머" : nameTextField.text!
+            viewModel.startTimer(withName: name)  // startAndSaveTimer 대신 startTimer 사용
         } else {
-            if let name = nameTextField.text, !name.isEmpty {
-                viewModel.saveTimer(name: name)
-            }
-            viewModel.startTimer()
+            viewModel.stopTimer()
         }
     }
 }
-
+    
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension TimerView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -360,6 +370,22 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
         // 선택 효과 해제
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    // 스와이프 삭제 활성화
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    // 스와이프 액션 설정
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] (_, _, completion) in
+            self?.viewModel.deleteTimer(at: indexPath.row)
+            completion(true)
+        }
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
 }
 
 // MARK: - SwiftUI Preview
