@@ -19,6 +19,7 @@ class AlarmCoreDataManager {
     func createAlarm(time: Date, repeatDays: Set<Int>, label: String, sound: String, reminder: Bool) -> Alarm? {
         let alarm = Alarm(context: context)
         alarm.time = time
+        // 코어데이터는 Set을 직접 저장할 수 없기 때문에 Data 타입으로 변환
         alarm.repeatDays = (try? JSONEncoder().encode(Array(repeatDays))) ?? Data()
         alarm.label = label
         alarm.sound = sound
@@ -87,6 +88,7 @@ class AlarmCoreDataManager {
     }
     
     // MARK: - Decode Repeat Days
+    // 코어데이터에 저장된 반복 요일 데이터를 다시 Set<Int>로 변환
     func decodeRepeatDays(from binaryData: Data?) -> Set<Int> {
         guard let binaryData = binaryData else { return [] }
         do {
