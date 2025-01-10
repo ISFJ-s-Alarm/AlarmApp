@@ -45,6 +45,7 @@ class AlarmEditorViewController: UIViewController {
     private func setupActions() {
         alarmEditView.cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         alarmEditView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        alarmEditView.timePicker.addTarget(self, action: #selector(timePickerValueChanged), for: .valueChanged)
     }
     
     @objc private func cancelButtonTapped() {
@@ -52,8 +53,60 @@ class AlarmEditorViewController: UIViewController {
     }
     
     @objc private func saveButtonTapped() {
-        viewModel.saveAlarm()
-        dismiss(animated: true)
+        viewModel.setTime(alarmEditView.timePicker.date)
+            
+            let saveResult = viewModel.saveAlarm()
+            print("알람 저장 결과: \(saveResult)")
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "HH:mm"
+            dateFormatter.locale = Locale(identifier: "ko_KR")
+            dateFormatter.timeZone = TimeZone.current
+            
+            let allAlarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+            print("현재 저장된 모든 알람:")
+            allAlarms.forEach { alarm in
+                if let time = alarm.time {
+                    print("시간: \(dateFormatter.string(from: time))")
+                }
+                print("레이블: \(alarm.label ?? "")")
+                print("반복: \(AlarmCoreDataManager.shared.decodeRepeatDays(from: alarm.repeatDays))")
+                print("사운드: \(alarm.sound ?? "")")
+                print("다시 알림: \(alarm.reminder)")
+                print("------------------------")
+            }
+            
+            dismiss(animated: true)
+    }
+    
+    @objc private func timePickerValueChanged(_ sender: UIDatePicker) {
+        viewModel.setTime(sender.date)
+    }
+    
+    private func setupInitialState() {
+        // TimePicker 초기값 설정
+        alarmEditView.timePicker.date = viewModel.getTime()
+        alarmEditView.timePicker.addTarget(self, action: #selector(timeChanged(_:)), for: .valueChanged)
+        
+        // 기존 데이터가 있다면 selectedDays 설정
+        selectedDays = viewModel.getSelectedDays()
+        
+        // 레이블 초기값 설정
+        labelText = viewModel.getLabel()
+    }
+
+    @objc private func timeChanged(_ sender: UIDatePicker) {
+        viewModel.setTime(sender.date)
+    }
+    
+    private func updateSelectedDays(_ days: [Int]) {
+        selectedDays = days
+        viewModel.setSelectedDays(days)
+        alarmEditView.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+    }
+    
+    @objc private func reminderSwitchChanged(_ sender: UISwitch) {
+        viewModel.toggleReminder()
     }
 }
 
@@ -121,7 +174,6 @@ extension AlarmEditorViewController: UITableViewDataSource {
             textField.tag = 1
             textField.clearButtonMode = .whileEditing
             textField.textAlignment = .right
-//            textField.contentMode = .right
             textField.returnKeyType = .done
             
             cell.contentView.addSubview(textField)
@@ -136,6 +188,8 @@ extension AlarmEditorViewController: UITableViewDataSource {
         case 3:
             cell.textLabel?.text = "다시 알림"
             let switchControl = UISwitch()
+            switchControl.isOn = viewModel.getReminderStatus()
+            switchControl.addTarget(self, action: #selector(reminderSwitchChanged(_:)), for: .valueChanged)
             cell.accessoryView = switchControl
         default:
             break
@@ -171,6 +225,7 @@ extension AlarmEditorViewController: UITableViewDelegate {
             let repeatVC = RepeatViewController(selectedDays: selectedDays)
             repeatVC.onDaysSelected = { [weak self] days in
                 self?.selectedDays = days
+                self?.viewModel.setSelectedDays(days)
                 self?.alarmEditView.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             }
             navigationController?.pushViewController(repeatVC, animated: true)
@@ -201,6 +256,7 @@ extension AlarmEditorViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField.tag == 1 {
             labelText = textField.text
+            viewModel.setLabel(textField.text ?? "")
             alarmEditView.tableView.reloadData()
         }
     }
