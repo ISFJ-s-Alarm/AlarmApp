@@ -14,7 +14,9 @@ struct TimerModel {
     var minutes: Int
     var seconds: Int
     var createdAt: Date
+    var selectedMusic: String?  // 음악이 없을수도 있기에 옵셔널 설정
     
+    // formattedTime 연산 프로퍼티 추가
     var formattedTime: String {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
@@ -25,7 +27,8 @@ struct TimerModel {
             hours: Int(item.hours),
             minutes: Int(item.minutes),
             seconds: Int(item.seconds),
-            createdAt: item.createdAt ?? Date()
+            createdAt: item.createdAt ?? Date(),
+            selectedMusic: item.selectedMusic
         )
     }
 }
