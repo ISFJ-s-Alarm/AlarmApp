@@ -59,13 +59,14 @@ class TimerCoreDataManager {
     ///   - hours: 시간 (0-23)
     ///   - minutes: 분 (0-59)
     ///   - seconds: 초 (0-59)
-    func saveTimer(name: String, hours: Int, minutes: Int, seconds: Int) {
+    func saveTimer(name: String, hours: Int, minutes: Int, seconds: Int, selectedMusic: String?) {
         let timer = TimerItem(context: context)
         timer.name = name
         timer.hours = Int16(hours)
         timer.minutes = Int16(minutes)
         timer.seconds = Int16(seconds)
         timer.createdAt = Date()
+        timer.selectedMusic = selectedMusic
         
         saveContext()
     }

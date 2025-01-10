@@ -309,6 +309,12 @@ class TimerView: UIViewController {
             make.centerY.equalToSuperview()
             make.leading.greaterThanOrEqualTo(timerEndButton.snp.trailing).offset(10)
         }
+        
+        recentTableView.snp.makeConstraints { make in
+            make.top.equalTo(recentLabel.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+        }
     }
     
     // MARK: - Button Actions
@@ -435,6 +441,7 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
 extension TimerView: MusicSelectViewControllerDelegate {
     func didSelectMusic(_ music: MusicModel) {
         selectedMusicLabel.text = music.name
+        viewModel.setSelectedMusic(music)
     }
 }
 
