@@ -136,6 +136,7 @@ class TimerView: UIViewController {
         timerEndButton.titleLabel?.font = .systemFont(ofSize: 16)
         timerEndButton.contentHorizontalAlignment = .left
         timerEndButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        timerEndButton.addTarget(self, action: #selector(timerEndButtonTapped), for: .touchUpInside)
 
         // 컨트롤 버튼 설정
         setupControlButton(resetButton, systemName: "arrow.counterclockwise")
@@ -332,6 +333,18 @@ class TimerView: UIViewController {
         } else {
             viewModel.stopTimer()
         }
+    }
+    
+    @objc private func timerEndButtonTapped() {
+        let musicVC = MusicSelectViewController()
+        musicVC.modalPresentationStyle = .pageSheet
+        
+        if let sheet = musicVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(musicVC, animated: true)
     }
 }
     
