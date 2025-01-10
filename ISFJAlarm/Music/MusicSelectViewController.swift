@@ -8,11 +8,18 @@
 import UIKit
 import AVFoundation
 
+protocol MusicSelectViewControllerDelegate: AnyObject {
+    func didSelectMusic(_ music: MusicModel)
+}
+
 class MusicSelectViewController: UIViewController {
+    // MARK: - Properties
+    weak var delegate: MusicSelectViewControllerDelegate?
     private var audioPlayer: AVAudioPlayer?
-    private var selectedMusic: MusicModel?
+    private var currentSelectedMusic: MusicModel?
     private var musicList: [MusicModel] = []
     
+    // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .clear
@@ -43,12 +50,14 @@ class MusicSelectViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         loadMusicList()
     }
     
+    // MARK: - Private Methods
     private func setupUI() {
         view.backgroundColor = .black
         
@@ -88,80 +97,66 @@ class MusicSelectViewController: UIViewController {
     }
     
     private func loadMusicList() {
-        if let resourcePath = Bundle.main.resourcePath {
-            print("Resource Path: \(resourcePath)")
-            do {
-                let items = try FileManager.default.contentsOfDirectory(atPath: resourcePath)
-                print("All bundle items: \(items)")
-                
-                // MP3 파일만 필터링
-                musicList = items
-                    .filter { $0.hasSuffix(".mp3") }
-                    .map { filename in
-                        MusicModel(
-                            name: filename.replacingOccurrences(of: ".mp3", with: ""),
-                            filename: filename,
-                            isSelected: false
-                        )
-                    }
-                
-                print("Found music files: \(musicList)")
-                tableView.reloadData()
-            } catch {
-                print("음악 파일 로드 실패: \(error)")
-                print("Error details: \(error.localizedDescription)")
-            }
-        } else {
-            print("리소스 경로를 찾을 수 없습니다.")
-        }
+        // 하드코딩된 음악 리스트 (실제로는 Bundle에서 로드)
+        musicList = [
+            MusicModel(name: "Adeles Oath Infinite", filename: "Adeles Oath Infinite.mp3", isSelected: false),
+            MusicModel(name: "Life is Full of Happiness", filename: "Life is Full of Happiness.mp3", isSelected: false),
+            MusicModel(name: "Raindrop Flower", filename: "Raindrop Flower.mp3", isSelected: false),
+            MusicModel(name: "Riding on the Clouds", filename: "Riding on the Clouds.mp3", isSelected: false),
+            MusicModel(name: "Romantic Sunset", filename: "Romantic Sunset.mp3", isSelected: false),
+            MusicModel(name: "When the Morning Comes", filename: "When the Morning Comes.mp3", isSelected: false)
+        ]
+        tableView.reloadData()
     }
     
     private func playMusic(_ music: MusicModel) {
-        print("재생 시도: \(music.name)")  // 디버깅용 로그
+        print("재생 시도: \(music.name)")
         
-        // 기존 재생 중인 음악 중지
         audioPlayer?.stop()
         
-        // 파일 경로 확인
         guard let path = Bundle.main.path(forResource: music.name, ofType: "mp3") else {
             print("음악 파일을 찾을 수 없습니다: \(music.name)")
             return
         }
         
         let url = URL(fileURLWithPath: path)
-        print("음악 파일 경로: \(url)")  // 디버깅용 로그
+        print("음악 파일 경로: \(url)")
         
         do {
-            // AVAudioSession 설정
             try AVAudioSession.sharedInstance().setCategory(.playback)
             try AVAudioSession.sharedInstance().setActive(true)
             
-            // 오디오 플레이어 초기화 및 재생
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
-            print("재생 시작됨")  // 디버깅용 로그
+            print("재생 시작됨")
         } catch {
             print("음악 재생 실패: \(error.localizedDescription)")
         }
     }
     
+    // MARK: - Button Actions
     @objc private func cancelButtonTapped() {
+        audioPlayer?.stop()
         dismiss(animated: true)
     }
     
     @objc private func settingButtonTapped() {
-        // 선택된 음악 저장 및 모달 닫기
+        if let selectedMusic = currentSelectedMusic {
+            delegate?.didSelectMusic(selectedMusic)
+        }
+        audioPlayer?.stop()
         dismiss(animated: true)
     }
     
     @objc private func silentButtonTapped() {
         audioPlayer?.stop()
-        selectedMusic = MusicModel.defaultMusic()
+        delegate?.didSelectMusic(MusicModel.defaultMusic())
         dismiss(animated: true)
     }
 }
 
+// MARK: - UITableViewDelegate, UITableViewDataSource
 extension MusicSelectViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return musicList.count
@@ -181,8 +176,15 @@ extension MusicSelectViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedMusic = musicList[indexPath.row]
-        print("선택된 음악: \(selectedMusic.name)")  // 디버깅용 로그
+        currentSelectedMusic = selectedMusic
         playMusic(selectedMusic)
+        
+        // 이전에 선택된 셀의 체크마크 제거
+        musicList.indices.forEach { index in
+            musicList[index].isSelected = (index == indexPath.row)
+        }
+        tableView.reloadData()
+        
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }

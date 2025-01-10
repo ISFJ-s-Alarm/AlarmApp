@@ -25,6 +25,8 @@ class TimerView: UIViewController {
     private let labelContainerView = UIView()
     private let labelTextLabel = UILabel()
     private let nameTextField = UITextField()
+    private let selectedMusicLabel =  UILabel()
+    private let musicContainerView = UIView()
     private let timerEndButton = UIButton()
     private let recentLabel = UILabel()
     private let recentTableView = UITableView()
@@ -131,43 +133,47 @@ class TimerView: UIViewController {
         // 타이머 종료 시 버튼 설정
         timerEndButton.setTitle("타이머 종료 시", for: .normal)
         timerEndButton.setTitleColor(.white, for: .normal)
-        timerEndButton.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
-        timerEndButton.layer.cornerRadius = 8
         timerEndButton.titleLabel?.font = .systemFont(ofSize: 16)
         timerEndButton.contentHorizontalAlignment = .left
-        timerEndButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
         timerEndButton.addTarget(self, action: #selector(timerEndButtonTapped), for: .touchUpInside)
-
+        
+        selectedMusicLabel.text = "무음"
+        selectedMusicLabel.textColor = .gray
+        selectedMusicLabel.font = .systemFont(ofSize:14)
+        
+        musicContainerView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        musicContainerView.layer.cornerRadius = 8
+        musicContainerView.clipsToBounds = true
+        
         // 컨트롤 버튼 설정
         setupControlButton(resetButton, systemName: "arrow.counterclockwise")
         setupControlButton(playPauseButton, systemName: "play.fill")
         playPauseButton.backgroundColor = .systemGreen
-
+        
         // 최근 항목 레이블 설정
         recentLabel.text = "최근 항목"
         recentLabel.font = .systemFont(ofSize: 20, weight: .bold)
         recentLabel.textColor = .white
-
+        
         // 컴포넌트 추가
-        [timerLabel,
-         hourButton, minuteButton, secondButton,
-         hourMinusButton, minuteMinusButton, secondMinusButton,
-         labelContainerView,
-         resetButton, playPauseButton, recentLabel, recentTableView, timerEndButton].forEach {
+        [timerLabel,hourButton, minuteButton, secondButton,hourMinusButton, minuteMinusButton, secondMinusButton,
+         labelContainerView,resetButton, playPauseButton, recentLabel, recentTableView, timerEndButton, selectedMusicLabel, musicContainerView].forEach {
             view.addSubview($0)
         }
-
+        
         labelContainerView.addSubview(labelTextLabel)
         labelContainerView.addSubview(nameTextField)
+        musicContainerView.addSubview(timerEndButton)
+        musicContainerView.addSubview(selectedMusicLabel)
     }
-
+    
     private func setupTimeButton(_ button: UIButton, title: String) {
         button.setTitle(title, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         button.layer.cornerRadius = 8
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-
+        
         switch title {
         case "시 +": button.addTarget(self, action: #selector(hourButtonTapped), for: .touchUpInside)
         case "분 +": button.addTarget(self, action: #selector(minuteButtonTapped), for: .touchUpInside)
@@ -178,13 +184,13 @@ class TimerView: UIViewController {
         default: break
         }
     }
-
+    
     private func setupControlButton(_ button: UIButton, systemName: String) {
         button.setImage(UIImage(systemName: systemName), for: .normal)
         button.tintColor = .white
         button.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         button.layer.cornerRadius = 35
-
+        
         if button == resetButton {
             button.addTarget(self, action: #selector(resetButtonTapped), for: .touchUpInside)
         } else {
@@ -198,40 +204,40 @@ class TimerView: UIViewController {
         recentTableView.delegate = self
         recentTableView.dataSource = self
     }
-
+    
     // MARK: - Auto Layout
     private func setupConstraints() {
         timerLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.centerX.equalToSuperview()
         }
-
+        
         hourButton.snp.makeConstraints { make in
             make.top.equalTo(timerLabel.snp.bottom).offset(40)
             make.leading.equalToSuperview().offset(20)
             make.width.equalTo((view.frame.width - 60) / 3)
             make.height.equalTo(40)
         }
-
+        
         minuteButton.snp.makeConstraints { make in
             make.top.equalTo(hourButton)
             make.leading.equalTo(hourButton.snp.trailing).offset(10)
             make.width.height.equalTo(hourButton)
         }
-
+        
         secondButton.snp.makeConstraints { make in
             make.top.equalTo(hourButton)
             make.leading.equalTo(minuteButton.snp.trailing).offset(10)
             make.width.height.equalTo(hourButton)
         }
-
+        
         hourMinusButton.snp.makeConstraints { make in
             make.top.equalTo(hourButton.snp.bottom).offset(10)
             make.leading.equalToSuperview().offset(20)
             make.width.equalTo((view.frame.width - 60) / 3)
             make.height.equalTo(40)
         }
-
+        
         minuteMinusButton.snp.makeConstraints { make in
             make.top.equalTo(hourMinusButton)
             make.leading.equalTo(hourMinusButton.snp.trailing).offset(10)
@@ -243,18 +249,18 @@ class TimerView: UIViewController {
             make.leading.equalTo(minuteMinusButton.snp.trailing).offset(10)
             make.width.height.equalTo(hourMinusButton)
         }
-
+        
         labelContainerView.snp.makeConstraints { make in
             make.top.equalTo(hourMinusButton.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
-
+        
         labelTextLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(15)
             make.centerY.equalToSuperview()
         }
-
+        
         nameTextField.snp.makeConstraints { make in
             make.leading.equalTo(labelTextLabel.snp.trailing).offset(10)
             make.trailing.equalToSuperview().offset(-15)
@@ -262,34 +268,40 @@ class TimerView: UIViewController {
             make.height.equalTo(40)
             make.width.greaterThanOrEqualTo(100) // 최소 너비 설정
         }
-
-        timerEndButton.snp.makeConstraints { make in
-            make.top.equalTo(labelContainerView.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(40)
-        }
-
+        
         resetButton.snp.makeConstraints { make in
-            make.top.equalTo(timerEndButton.snp.bottom).offset(20)
+            make.top.equalTo(musicContainerView.snp.bottom).offset(20)  // timerEndButton을 musicContainerView로 변경
             make.trailing.equalTo(view.snp.centerX).offset(-20)
             make.width.height.equalTo(70)
         }
-
+        
         playPauseButton.snp.makeConstraints { make in
             make.top.equalTo(resetButton)
             make.leading.equalTo(view.snp.centerX).offset(20)
             make.width.height.equalTo(resetButton)
         }
-
+        
         recentLabel.snp.makeConstraints { make in
             make.top.equalTo(resetButton.snp.bottom).offset(40)
             make.leading.equalToSuperview().offset(20)
         }
+        
+        musicContainerView.snp.makeConstraints { make in
+            make.top.equalTo(labelContainerView.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
 
-        recentTableView.snp.makeConstraints { make in
-            make.top.equalTo(recentLabel.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
+        timerEndButton.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(15)  // labelTextLabel과 같은 위치
+            make.centerY.equalToSuperview()
+            make.height.equalToSuperview()
+        }
+
+        selectedMusicLabel.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-15)
+            make.centerY.equalToSuperview()
+            make.leading.greaterThanOrEqualTo(timerEndButton.snp.trailing).offset(10)
         }
     }
     
@@ -337,6 +349,7 @@ class TimerView: UIViewController {
     
     @objc private func timerEndButtonTapped() {
         let musicVC = MusicSelectViewController()
+        musicVC.delegate = self
         musicVC.modalPresentationStyle = .pageSheet
         
         if let sheet = musicVC.sheetPresentationController {
@@ -399,6 +412,13 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
+}
+
+// TimerView에 delegate 구현 추가
+extension TimerView: MusicSelectViewControllerDelegate {
+    func didSelectMusic(_ music: MusicModel) {
+        selectedMusicLabel.text = music.name
+    }
 }
 
 // MARK: - SwiftUI Preview
