@@ -12,6 +12,11 @@ class AlertViewController: UIViewController {
     var player: AVPlayer?
     private let timeLabel = UILabel() // 현재 시간 표시를 위한 UILabel
     private var timer: Timer? // 시간을 갱신하기 위한 타이머
+    private let minusButton = UIButton() // 마이너스 버튼
+    private let plusButton = UIButton() // 플러스 버튼
+    private let snoozeButton = UIButton() // 다시 알림 버튼
+
+    private var snoozeTime = 5 // 다시 알림 시간 (기본값: 5분)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +24,8 @@ class AlertViewController: UIViewController {
         setupVideoBackground()
         setupTimeLabel() // 시간 라벨 설정!
         setupSnoozeButton()
+        setupMinusButton()
+        setupPlusButton()
         setupDismissButton()
     }
 
@@ -61,38 +68,37 @@ class AlertViewController: UIViewController {
     }
     
     // 현재 시간 표시를 위한 UILabel 설정
-        func setupTimeLabel() {
-            timeLabel.textColor = .white
-            timeLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
-            timeLabel.textAlignment = .center
-            timeLabel.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(timeLabel)
+    func setupTimeLabel() {
+        timeLabel.textColor = .white
+        timeLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
+        timeLabel.textAlignment = .center
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(timeLabel)
 
-            NSLayoutConstraint.activate([
-                timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -250) // 화면 중앙보다 위로 100포인트
-            ])
-
-            // 타이머 시작
-            startTimer()
-        }
+        NSLayoutConstraint.activate([
+            timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -250) // 화면 중앙보다 위로 100포인트
+        ])
 
         // 타이머 시작
-        func startTimer() {
-            updateTime() // 초기 시간 설정
-            timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
-        }
+        startTimer()
+    }
 
-        // 현재 시간을 업데이트
-        @objc func updateTime() {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm:ss" // 시:분:초 형식
-            timeLabel.text = formatter.string(from: Date())
-        }
+    // 타이머 시작
+    func startTimer() {
+        updateTime() // 초기 시간 설정
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+    }
+
+    // 현재 시간을 업데이트
+    @objc func updateTime() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss" // 시:분:초 형식
+        timeLabel.text = formatter.string(from: Date())
+    }
 
     // "다시 알림" 버튼 추가!
     func setupSnoozeButton() {
-        let snoozeButton = UIButton()
         snoozeButton.setTitle("다시 알림", for: .normal)
         snoozeButton.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         snoozeButton.setTitleColor(.white, for: .normal)
@@ -110,6 +116,68 @@ class AlertViewController: UIViewController {
             snoozeButton.widthAnchor.constraint(equalToConstant: 150),
             snoozeButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+
+    // "마이너스" 버튼 추가!
+    func setupMinusButton() {
+        minusButton.setTitle("-", for: .normal)
+        minusButton.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        minusButton.setTitleColor(.white, for: .normal)
+        minusButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        minusButton.layer.cornerRadius = 20
+        minusButton.translatesAutoresizingMaskIntoConstraints = false
+
+        minusButton.addTarget(self, action: #selector(decreaseSnoozeTime), for: .touchUpInside)
+
+        view.addSubview(minusButton)
+
+        NSLayoutConstraint.activate([
+            minusButton.centerYAnchor.constraint(equalTo: snoozeButton.centerYAnchor),
+            minusButton.trailingAnchor.constraint(equalTo: snoozeButton.leadingAnchor, constant: -20),
+            minusButton.widthAnchor.constraint(equalToConstant: 50),
+            minusButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
+    // "플러스" 버튼 추가!
+    func setupPlusButton() {
+        plusButton.setTitle("+", for: .normal)
+        plusButton.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        plusButton.setTitleColor(.white, for: .normal)
+        plusButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        plusButton.layer.cornerRadius = 20
+        plusButton.translatesAutoresizingMaskIntoConstraints = false
+
+        plusButton.addTarget(self, action: #selector(increaseSnoozeTime), for: .touchUpInside)
+
+        view.addSubview(plusButton)
+
+        NSLayoutConstraint.activate([
+            plusButton.centerYAnchor.constraint(equalTo: snoozeButton.centerYAnchor),
+            plusButton.leadingAnchor.constraint(equalTo: snoozeButton.trailingAnchor, constant: 20),
+            plusButton.widthAnchor.constraint(equalToConstant: 50),
+            plusButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
+    // "다시 알림" 버튼 동작
+    @objc func snoozeAlarm() {
+        print("다시 알림 버튼 클릭됨!")
+        showAlert("슬슬 일어나자", "설정된 시간: \(snoozeTime)분 후 다시 알림이 설정되었습니다.")
+    }
+
+    // "마이너스" 버튼 동작
+    @objc func decreaseSnoozeTime() {
+        if snoozeTime > 1 {
+            snoozeTime -= 5
+        }
+        print("다시 알림 시간 감소: \(snoozeTime)분")
+    }
+
+    // "플러스" 버튼 동작
+    @objc func increaseSnoozeTime() {
+        snoozeTime += 5
+        print("다시 알림 시간 증가: \(snoozeTime)분")
     }
 
     // "중단" 버튼 추가!
@@ -134,21 +202,18 @@ class AlertViewController: UIViewController {
         ])
     }
 
-    // "다시 알림" 버튼 동작
-    @objc func snoozeAlarm() {
-        print("다시 알림 버튼 클릭됨!")
-        dismiss(animated: true, completion: nil)
-        // 여기에 스누즈 알람 설정 로직 추가 가능
-    }
-
     // "중단" 버튼 동작
     @objc func stopAlarm() {
         print("중단 버튼 클릭됨!")
         player?.pause()
-
-        // 반복 재생을 멈추기 위해 NotificationCenter에서 제거
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: player?.currentItem)
-        
         dismiss(animated: true, completion: nil)
+    }
+
+    // 알림 표시
+    func showAlert(_ title: String, _ message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }
