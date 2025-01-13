@@ -93,12 +93,12 @@ class AlertViewController: UIViewController {
 
         timeLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(100)
+            $0.top.equalToSuperview().offset(130)
         }
 
         snoozeButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.centerY.equalToSuperview().offset(100)
+            $0.centerY.equalToSuperview().offset(200)
             $0.width.equalTo(150)
             $0.height.equalTo(50)
         }
