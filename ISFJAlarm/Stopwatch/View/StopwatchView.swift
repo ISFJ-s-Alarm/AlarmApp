@@ -79,7 +79,8 @@ class StopwatchView: UIView {
 
         tableView.snp.makeConstraints {
             $0.top.equalTo(resetButton.snp.bottom).offset(40)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview().offset(-130)
         }
     }
 
@@ -112,16 +113,17 @@ class StopwatchView: UIView {
 
         // 레이아웃 설정
         lapLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(24)
+            $0.leading.equalToSuperview().offset(80)
             $0.centerY.equalToSuperview()
         }
 
         lapTimeLabel.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.leading.equalTo(lapLabel).offset(100)
+            $0.centerY.equalToSuperview()
         }
 
         totalTimeLabel.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-26)
+            $0.leading.equalTo(lapTimeLabel).offset(120)
             $0.centerY.equalToSuperview()
         }
     }
