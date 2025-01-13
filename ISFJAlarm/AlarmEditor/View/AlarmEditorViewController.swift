@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 class AlarmEditorViewController: UIViewController {
+    
     private let alarmEditView = AlarmEditorView()
     private var viewModel = AlarmEditorViewModel()
     private var selectedDays: [Int] = []
@@ -47,6 +48,7 @@ class AlarmEditorViewController: UIViewController {
         alarmEditView.tableView.delegate = self
     }
     
+    // MARK: - Functions
     private func backButtonSetupUI() {
         let backBarButton = UIBarButtonItem(title: "뒤로", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backBarButton
@@ -129,7 +131,7 @@ class AlarmEditorViewController: UIViewController {
     }
 }
 
-// MARK: - extension
+// MARK: - UITableViewDataSource
 extension AlarmEditorViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 4
@@ -243,6 +245,7 @@ extension AlarmEditorViewController: UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewDelegate
 extension AlarmEditorViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -276,6 +279,7 @@ extension AlarmEditorViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - UITextFieldDelegate
 extension AlarmEditorViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         alarmEditView.tableView.scrollToRow(at: IndexPath(row: 1, section: 0), at: .middle, animated: true)
@@ -295,6 +299,7 @@ extension AlarmEditorViewController: UITextFieldDelegate {
     }
 }
 
+// MARK: - SoundViewControllerDelegate
 extension AlarmEditorViewController: SoundViewControllerDelegate {
     func didSelectSound(_ sound: String) {
         viewModel.setSound(sound)

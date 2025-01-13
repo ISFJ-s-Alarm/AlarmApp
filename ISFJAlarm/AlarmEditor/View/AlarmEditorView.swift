@@ -97,6 +97,7 @@ class AlarmEditorView: UIView {
     }
 }
 
+// MARK: - Extension
 extension AlarmEditorView {
     func updateTitle(isEditing: Bool) {
         titleLabel.text = isEditing ? "알람 편집" : "알람 추가"

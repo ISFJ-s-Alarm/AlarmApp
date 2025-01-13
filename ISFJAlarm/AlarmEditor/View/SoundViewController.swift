@@ -43,6 +43,7 @@ class SoundViewController: UIViewController {
         loadMusicList()
     }
     
+    // MARK: - Functions
     private func setupUI() {
         view.backgroundColor = .black
         title = "사운드"
@@ -123,7 +124,7 @@ class SoundViewController: UIViewController {
     }
 }
 
-// MARK: - extension
+// MARK: - UITableViewDelegate, UITableViewDataSource
 extension SoundViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return musicList.count
