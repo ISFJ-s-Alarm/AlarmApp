@@ -9,13 +9,16 @@ import UIKit
 import SnapKit
 import Then
 
+/// 알람 화면의 UI를 담당하는 뷰
 class AlertView: UIView {
-    
+    // 현재 시간 표시 라벨
     let timeLabel = UILabel().then {
         $0.textColor = .white
         $0.font = UIFont.systemFont(ofSize: 40, weight: .bold)
         $0.textAlignment = .center
     }
+
+    // 마이너스 버튼 (시간 감소)
     let minusButton = UIButton().then {
         $0.setTitle("-", for: .normal)
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.8)
@@ -23,6 +26,8 @@ class AlertView: UIView {
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         $0.layer.cornerRadius = 20
     }
+
+    // 플러스 버튼 (시간 증가)
     let plusButton = UIButton().then {
         $0.setTitle("+", for: .normal)
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.8)
@@ -30,6 +35,8 @@ class AlertView: UIView {
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         $0.layer.cornerRadius = 20
     }
+
+    // 다시 알림 버튼
     let snoozeButton = UIButton().then {
         $0.setTitle("다시 알림", for: .normal)
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.8)
@@ -37,6 +44,8 @@ class AlertView: UIView {
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         $0.layer.cornerRadius = 25
     }
+
+    // 알람 종료 버튼
     let dismissButton = UIButton().then {
         $0.setTitle("중단", for: .normal)
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.8)
@@ -47,7 +56,7 @@ class AlertView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI()
+        setupUI() // UI 설정
     }
 
     required init?(coder: NSCoder) {
@@ -55,6 +64,7 @@ class AlertView: UIView {
         setupUI()
     }
 
+    /// UI 요소 배치 및 제약 조건 설정
     private func setupUI() {
         [timeLabel, minusButton, plusButton, snoozeButton, dismissButton].forEach { addSubview($0) }
 
