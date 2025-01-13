@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import AVFoundation
 
 class TimerViewModel {
     // Published properties
@@ -19,6 +20,11 @@ class TimerViewModel {
     // Private properties
     private var timer: Timer?
     private let coreDataManager = TimerCoreDataManager.shared
+    private var audioPlayer: AVAudioPlayer?
+    private var selectedMusic: MusicModel?
+    func setSelectedMusic(_ music: MusicModel) {
+        selectedMusic = music
+    }
     
     // MARK: - Timer Operations
     func incrementHours() {
@@ -45,13 +51,30 @@ class TimerViewModel {
         seconds = seconds > 0 ? seconds - 1 : 59
     }
     
-    func startTimer() {
-        guard timer == nil, (hours > 0 || minutes > 0 || seconds > 0) else { return }
+    func startTimer(withName name: String) {
+        guard !isRunning else { return }
         
+        print("1. startTimer 시작")
+        // CoreData에 한 번만 저장
+        coreDataManager.saveTimer(
+            name: name,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds,
+            selectedMusic: selectedMusic?.name
+        )
+        print("2. CoreData 저장 완료")
+        
+        // 2. 즉시 타이머 목록 갱신
+        loadTimers()
+        print("3. loadTimers 호출 완료")
+        
+        // 3. 타이머 상태 변경 및 시작
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateTimer()
         }
+        print("4. 타이머 시작 완료")
     }
     
     func stopTimer() {
@@ -85,7 +108,30 @@ class TimerViewModel {
             seconds = 59
         } else {
             stopTimer()
-            // TODO: 타이머 종료 알림 추가
+            playTimerEndMusic()  // 타이머 종료 시 음악 재생
+        }
+    }
+    
+    // 음악 재생 기능 추가
+    private func playTimerEndMusic() {
+        guard let music = selectedMusic, music.name != "무음" else { return }
+        
+        guard let path = Bundle.main.path(forResource: music.name, ofType: "mp3") else {
+            print("음악 파일을 찾을 수 없습니다: \(music.name)")
+            return
+        }
+        
+        let url = URL(fileURLWithPath: path)
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("음악 재생 실패: \(error.localizedDescription)")
         }
     }
     
@@ -93,19 +139,41 @@ class TimerViewModel {
     
     // MARK: - Data Operations
     func saveTimer(name: String) {
-        guard !name.isEmpty else { return }
-        coreDataManager.saveTimer(name: name, hours: hours, minutes: minutes, seconds: seconds)
+        coreDataManager.saveTimer(name: name, hours: hours, minutes: minutes, seconds: seconds, selectedMusic: nil)
         loadTimers()
     }
     
     func loadTimers() {
+        print("loadTimers 시작")
         let items = coreDataManager.fetchTimers()
-        timerItems = items.map { TimerModel.fromTimerItem($0) }
+        print("가져온 타이머 개수: \(items.count)")
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.timerItems = items.map { TimerModel.fromTimerItem($0) }
+            print("timerItems 업데이트 완료: \(self?.timerItems.count ?? 0)개")
+        }
     }
     
     func deleteTimer(at index: Int) {
-        guard index < timerItems.count else { return }
-        // CoreData 삭제 로직 추가 필요
+        // 1. 먼저 CoreData에서 해당 타이머를 가져옴
+        let timers = coreDataManager.fetchTimers()
+        guard index < timers.count else { return }
+        
+        // 2. CoreData와 로컬 배열을 동시에 업데이트
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // CoreData에서 삭제
+            self.coreDataManager.deleteTimer(timers[index])
+            
+            // 로컬 배열 업데이트 (배열 범위 체크 추가)
+            if index < self.timerItems.count {
+                self.timerItems.remove(at: index)
+            }
+            
+            // UI 업데이트를 위해 Published 프로퍼티 갱신
+            self.timerItems = self.timerItems
+        }
     }
     
     // MARK: - Formatted Time
