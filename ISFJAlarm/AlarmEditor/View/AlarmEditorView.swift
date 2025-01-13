@@ -96,3 +96,17 @@ class AlarmEditorView: UIView {
         
     }
 }
+
+// MARK: - Extension
+extension AlarmEditorView {
+    func updateTitle(isEditing: Bool) {
+        titleLabel.text = isEditing ? "알람 편집" : "알람 추가"
+    }
+    
+    func configure(with alarm: Alarm?) {
+        if let alarm = alarm {
+            timePicker.date = alarm.time ?? Date()
+            // 기타 UI 업데이트
+        }
+    }
+}

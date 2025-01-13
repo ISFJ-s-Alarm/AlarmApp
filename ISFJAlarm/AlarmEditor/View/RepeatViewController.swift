@@ -33,6 +33,7 @@ class RepeatViewController: UIViewController {
         setupTableView()
     }
 
+    // MARK: - Functions
     private func setupUI() {
         view.backgroundColor = .black
         
@@ -75,7 +76,7 @@ class RepeatViewController: UIViewController {
     }
 }
 
-// MARK: - extension
+// MARK: - UITableViewDataSource
 extension RepeatViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return days.count
@@ -99,6 +100,7 @@ extension RepeatViewController: UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewDelegate
 extension RepeatViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
