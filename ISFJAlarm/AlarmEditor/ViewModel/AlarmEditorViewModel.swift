@@ -10,7 +10,11 @@ import Foundation
 class AlarmEditorViewModel {
     
     private let coreDataManager = AlarmCoreDataManager.shared
-    private var existingAlarm: Alarm?
+    
+    var isEditing: Bool {
+        return existingAlarm != nil
+    }
+    var existingAlarm: Alarm?
     
     var updateUI: (() -> Void)?
     

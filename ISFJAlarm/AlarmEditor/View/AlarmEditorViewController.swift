@@ -10,11 +10,27 @@ import SnapKit
 
 class AlarmEditorViewController: UIViewController {
     private let alarmEditView = AlarmEditorView()
-    private let viewModel = AlarmEditorViewModel()
+    private var viewModel = AlarmEditorViewModel()
     private var selectedDays: [Int] = []
     
     private var labelText: String?
     private var labelTextField: UITextField?
+    
+    // 기본 초기화 (새 알람 추가)
+    init() {
+        self.viewModel = AlarmEditorViewModel()
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    // 기존 알람 편집을 위한 초기화
+    init(alarm: Alarm) {
+        self.viewModel = AlarmEditorViewModel(alarm: alarm)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         view = alarmEditView
@@ -25,6 +41,7 @@ class AlarmEditorViewController: UIViewController {
         backButtonSetupUI()
         setupBindings()
         setupActions()
+        setupInitialState()
         
         alarmEditView.tableView.dataSource = self
         alarmEditView.tableView.delegate = self
@@ -48,41 +65,6 @@ class AlarmEditorViewController: UIViewController {
         alarmEditView.timePicker.addTarget(self, action: #selector(timePickerValueChanged), for: .valueChanged)
     }
     
-    @objc private func cancelButtonTapped() {
-        dismiss(animated: true)
-    }
-    
-    @objc private func saveButtonTapped() {
-        viewModel.setTime(alarmEditView.timePicker.date)
-            
-            let saveResult = viewModel.saveAlarm()
-            print("알람 저장 결과: \(saveResult)")
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm"
-            dateFormatter.locale = Locale(identifier: "ko_KR")
-            dateFormatter.timeZone = TimeZone.current
-            
-            let allAlarms = AlarmCoreDataManager.shared.fetchAllAlarms()
-            print("현재 저장된 모든 알람:")
-            allAlarms.forEach { alarm in
-                if let time = alarm.time {
-                    print("시간: \(dateFormatter.string(from: time))")
-                }
-                print("레이블: \(alarm.label ?? "")")
-                print("반복: \(AlarmCoreDataManager.shared.decodeRepeatDays(from: alarm.repeatDays))")
-                print("사운드: \(alarm.sound ?? "")")
-                print("다시 알림: \(alarm.reminder)")
-                print("------------------------")
-            }
-            
-            dismiss(animated: true)
-    }
-    
-    @objc private func timePickerValueChanged(_ sender: UIDatePicker) {
-        viewModel.setTime(sender.date)
-    }
-    
     private func setupInitialState() {
         // TimePicker 초기값 설정
         alarmEditView.timePicker.date = viewModel.getTime()
@@ -93,16 +75,53 @@ class AlarmEditorViewController: UIViewController {
         
         // 레이블 초기값 설정
         labelText = viewModel.getLabel()
-    }
-
-    @objc private func timeChanged(_ sender: UIDatePicker) {
-        viewModel.setTime(sender.date)
+        
+        alarmEditView.configure(with: viewModel.existingAlarm)
     }
     
     private func updateSelectedDays(_ days: [Int]) {
         selectedDays = days
         viewModel.setSelectedDays(days)
         alarmEditView.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+    }
+    
+    @objc private func cancelButtonTapped() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func saveButtonTapped() {
+        viewModel.setTime(alarmEditView.timePicker.date)
+        
+        let saveResult = viewModel.saveAlarm()
+        print("알람 \(viewModel.isEditing ? "수정" : "저장") 결과: \(saveResult)")
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.timeZone = TimeZone.current
+        
+        let allAlarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+        print("현재 저장된 모든 알람:")
+        allAlarms.forEach { alarm in
+            if let time = alarm.time {
+                print("시간: \(dateFormatter.string(from: time))")
+            }
+            print("레이블: \(alarm.label ?? "")")
+            print("반복: \(AlarmCoreDataManager.shared.decodeRepeatDays(from: alarm.repeatDays))")
+            print("사운드: \(alarm.sound ?? "")")
+            print("다시 알림: \(alarm.reminder)")
+            print("------------------------")
+        }
+        
+        dismiss(animated: true)
+    }
+    
+    @objc private func timePickerValueChanged(_ sender: UIDatePicker) {
+        viewModel.setTime(sender.date)
+    }
+
+    @objc private func timeChanged(_ sender: UIDatePicker) {
+        viewModel.setTime(sender.date)
     }
     
     @objc private func reminderSwitchChanged(_ sender: UISwitch) {
