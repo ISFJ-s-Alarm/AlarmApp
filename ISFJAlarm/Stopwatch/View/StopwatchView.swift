@@ -31,7 +31,7 @@ class StopwatchView: UIView {
 
     /// UI 구성 메서드
     private func setupUI() {
-        backgroundColor = .black
+        backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
 
         // 타이머 레이블 설정
         timerLabel.text = "00:00.00"
@@ -40,9 +40,9 @@ class StopwatchView: UIView {
         timerLabel.textAlignment = .center
 
         // 버튼 구성
-        configureButton(resetButton, title: "리셋", color: .darkGray)
-        configureButton(startStopButton, title: "시작", color: .systemGreen)
-        configureButton(lapButton, title: "랩", color: .darkGray)
+        configureButton(resetButton, title: "리셋", color: UIColor(red: 67/255, green: 67/255, blue: 67/255, alpha: 1))
+        configureButton(startStopButton, title: "시작", color: UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1))
+        configureButton(lapButton, title: "랩", color: UIColor(red: 72/255, green: 144/255, blue: 216/255, alpha: 1))
 
         // 테이블 헤더 구성
         setupHeaderView()
