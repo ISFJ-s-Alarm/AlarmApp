@@ -31,13 +31,13 @@ class AlarmEditorViewModel {
             self.alarmTime = alarm.time ?? Date()
             self.selectedDays = coreDataManager.decodeRepeatDays(from: alarm.repeatDays)
             self.label = alarm.label ?? "알람"
-            self.sound = alarm.sound ?? "없음"
+            self.sound = alarm.sound ?? "무음"
             self.reminder = alarm.reminder
         } else {
             self.alarmTime = Date()
             self.selectedDays = []
             self.label = "알람"
-            self.sound = "없음"
+            self.sound = "무음"
             self.reminder = false
         }
     }

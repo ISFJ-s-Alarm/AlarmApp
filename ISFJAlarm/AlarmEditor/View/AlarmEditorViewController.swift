@@ -119,7 +119,7 @@ class AlarmEditorViewController: UIViewController {
     @objc private func timePickerValueChanged(_ sender: UIDatePicker) {
         viewModel.setTime(sender.date)
     }
-
+    
     @objc private func timeChanged(_ sender: UIDatePicker) {
         viewModel.setTime(sender.date)
     }
@@ -176,7 +176,7 @@ extension AlarmEditorViewController: UITableViewDataSource {
                     $0.centerY.equalToSuperview()
                 }
             }
-        
+            
         case 1:
             cell.textLabel?.text = "레이블"
             let textField = UITextField()
@@ -203,7 +203,15 @@ extension AlarmEditorViewController: UITableViewDataSource {
             }
         case 2:
             cell.textLabel?.text = "사운드"
-            cell.accessoryType = .disclosureIndicator
+            let soundLabel = UILabel()
+            soundLabel.text = viewModel.getSound()
+            soundLabel.textColor = .lightGray
+            
+            cell.contentView.addSubview(soundLabel)
+            soundLabel.snp.makeConstraints {
+                $0.trailing.equalToSuperview().offset(-20)
+                $0.centerY.equalToSuperview()
+            }
         case 3:
             cell.textLabel?.text = "다시 알림"
             let switchControl = UISwitch()
@@ -217,24 +225,24 @@ extension AlarmEditorViewController: UITableViewDataSource {
     }
     
     private func getRepeatText(_ days: [Int]) -> String {
-            let sortedDays = days.sorted()
-            let weekdays = Set([1, 2, 3, 4, 5])
-            let weekend = Set([0, 6])
-            let allDays = Set(0...6)
-            
-            if Set(days) == allDays {
-                return "매일"
-            } else if Set(days) == weekdays {
-                return "주중"
-            } else if Set(days) == weekend {
-                return "주말"
-            } else {
-                let daySymbols = ["일", "월", "화", "수", "목", "금", "토"]
-                return sortedDays.map { daySymbols[$0] }.joined(separator: ",")
-            }
+        let sortedDays = days.sorted()
+        let weekdays = Set([1, 2, 3, 4, 5])
+        let weekend = Set([0, 6])
+        let allDays = Set(0...6)
+        
+        if Set(days) == allDays {
+            return "매일"
+        } else if Set(days) == weekdays {
+            return "주중"
+        } else if Set(days) == weekend {
+            return "주말"
+        } else {
+            let daySymbols = ["일", "월", "화", "수", "목", "금", "토"]
+            return sortedDays.map { daySymbols[$0] }.joined(separator: ",")
         }
+    }
 }
-    
+
 extension AlarmEditorViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -251,11 +259,12 @@ extension AlarmEditorViewController: UITableViewDelegate {
         case 1:
             labelTextField?.becomeFirstResponder()
         case 2:
-            let soundVC = SoundViewController()
-            self.navigationController?.pushViewController(soundVC, animated: true)
+            let soundVC = SoundViewController(selectedSound: viewModel.getSound())
+            soundVC.delegate = self
+            navigationController?.pushViewController(soundVC, animated: true)
         case 3:
             if let cell = tableView.cellForRow(at: indexPath), let switchControl = cell.accessoryView as? UISwitch {
-                // Todo: switchControl.isOn 상태 처리 로직
+                // TODO: switchControl.isOn 상태 처리 로직
             }
         default:
             break
@@ -271,7 +280,7 @@ extension AlarmEditorViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         alarmEditView.tableView.scrollToRow(at: IndexPath(row: 1, section: 0), at: .middle, animated: true)
     }
-
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField.tag == 1 {
             labelText = textField.text
@@ -283,5 +292,12 @@ extension AlarmEditorViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+extension AlarmEditorViewController: SoundViewControllerDelegate {
+    func didSelectSound(_ sound: String) {
+        viewModel.setSound(sound)
+        alarmEditView.tableView.reloadData()
     }
 }
