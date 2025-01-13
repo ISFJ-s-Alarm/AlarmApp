@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-class AlarmMainVC: UIViewController {
+class ViewController: UIViewController {
 
     
     //MARK: UI요소
@@ -105,7 +105,7 @@ class AlarmMainVC: UIViewController {
 }
 
 //MARK: TableView
-extension AlarmMainVC: UITableViewDataSource {
+extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return mockData.count
     }
@@ -120,7 +120,7 @@ extension AlarmMainVC: UITableViewDataSource {
 }
 //MARK: Cell Click시 액션
 //알람 추가 뷰로 이동
-extension AlarmMainVC: UITableViewDelegate {
+extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cellClicked = AlarmEditorViewController()
         present(cellClicked, animated: true, completion: nil)
