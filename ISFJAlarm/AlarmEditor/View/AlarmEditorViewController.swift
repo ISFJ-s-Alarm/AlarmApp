@@ -226,6 +226,7 @@ extension AlarmEditorViewController: UITableViewDataSource {
             cell.textLabel?.text = "다시 알림"
             let switchControl = UISwitch()
             switchControl.isOn = viewModel.getReminderStatus()
+            switchControl.onTintColor = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
             switchControl.addTarget(self, action: #selector(reminderSwitchChanged(_:)), for: .valueChanged)
             cell.accessoryView = switchControl
         default:
