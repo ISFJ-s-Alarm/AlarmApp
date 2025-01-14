@@ -19,7 +19,15 @@ class TimerCoreDataManager {
     /// - container 초기화 및 persistent store 로드를 처리
     /// - 로드 실패 시 fatal error 발생
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Timer")
+        guard let modelURL = Bundle.main.url(forResource: "ISFJAlarm", withExtension: "momd") else {
+            fatalError("코어 데이터 모델 파일을 찾을 수 없습니다.")
+        }
+        
+        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("코어 데이터 모델을 로드할 수 없습니다.")
+        }
+        
+        let container = NSPersistentContainer(name: "ISFJAlarm", managedObjectModel: model)
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("코어 데이터 로드 실패: \(error)")
@@ -98,5 +106,15 @@ class TimerCoreDataManager {
             // 실패 시 context 리셋
             context.rollback()
         }
+    }
+}
+
+
+private func validateCoreDataSetup() {
+    print("Bundle path: \(Bundle.main.bundlePath)")
+    if let modelURL = Bundle.main.url(forResource: "Timer", withExtension: "momd") {
+        print("Model URL found: \(modelURL)")
+    } else {
+        print("Failed to find Timer.momd")
     }
 }

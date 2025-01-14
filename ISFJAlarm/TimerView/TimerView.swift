@@ -42,7 +42,19 @@ class TimerView: UIViewController {
         viewModel.delegate = self  // 델리게이트 설정
         viewModel.loadTimers()
     }
-
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // 안전한 여백 확보를 위해 bottom inset 추가
+        recentTableView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: 90, // 탭바 높이 + 추가 여백
+            right: 0
+        )
+    }
+    
     // MARK: - Bindings
     private func setupBindings() {
         viewModel.$isRunning
@@ -105,7 +117,7 @@ class TimerView: UIViewController {
         
         // 타이머 레이블 설정
         timerLabel.text = "00:00:00"
-        timerLabel.font = .systemFont(ofSize: 80, weight: .regular)
+        timerLabel.font = .systemFont(ofSize: 60, weight: .regular)
         timerLabel.textColor = .white
         timerLabel.textAlignment = .center
 
@@ -200,25 +212,25 @@ class TimerView: UIViewController {
     
     private func setupConstraints() {
         timerLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.centerX.equalToSuperview()
         }
         
         timePickerView.snp.makeConstraints { make in
-            make.top.equalTo(timerLabel.snp.bottom).offset(20)
+            make.top.equalTo(timerLabel.snp.bottom).offset(10)
             make.centerX.equalToSuperview()
             make.width.equalToSuperview()
-            make.height.equalTo(200)
+            make.height.equalTo(150)
         }
         
         labelContainerView.snp.makeConstraints { make in
-            make.top.equalTo(timePickerView.snp.bottom).offset(20)
+            make.top.equalTo(timePickerView.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
         
         labelTextLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(15)
+            make.leading.equalToSuperview().offset(10)
             make.centerY.equalToSuperview()
         }
         
@@ -231,7 +243,7 @@ class TimerView: UIViewController {
         }
         
         resetButton.snp.makeConstraints { make in
-            make.top.equalTo(musicContainerView.snp.bottom).offset(20)
+            make.top.equalTo(musicContainerView.snp.bottom).offset(10)
             make.trailing.equalTo(view.snp.centerX).offset(-20)
             make.width.height.equalTo(70)
         }
@@ -243,7 +255,7 @@ class TimerView: UIViewController {
         }
         
         recentLabel.snp.makeConstraints { make in
-            make.top.equalTo(resetButton.snp.bottom).offset(40)
+            make.top.equalTo(resetButton.snp.bottom).offset(10)
             make.leading.equalToSuperview().offset(20)
         }
         
@@ -254,7 +266,7 @@ class TimerView: UIViewController {
         }
 
         timerEndButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(15)
+            make.leading.equalToSuperview().offset(10)
             make.centerY.equalToSuperview()
             make.height.equalToSuperview()
         }
@@ -266,9 +278,9 @@ class TimerView: UIViewController {
         }
         
         recentTableView.snp.makeConstraints { make in
-            make.top.equalTo(recentLabel.snp.bottom).offset(20)
+            make.top.equalTo(recentLabel.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview().inset(20)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-100)
         }
     }
     
@@ -410,7 +422,7 @@ extension TimerView: UITableViewDelegate, UITableViewDataSource {
    }
 
    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-       return 44
+       return 60
    }
 
    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
