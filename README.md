@@ -135,7 +135,7 @@ main
 └── develop
     ├── feature/alarm/MainView     # 이재건
     ├── feature/alarm/stopwatch    # 서현욱
-    ├── feature/TimerView      # 유태호
+    ├── feature/TimerView          # 유태호
     ├── feature/alarm-alert        # 오푸른솔
     └── feature/alarm/editor       # 서지민
 ```
