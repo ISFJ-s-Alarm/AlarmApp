@@ -36,14 +36,14 @@ class StopwatchLapCell: UITableViewCell {
 
         lapLabel.font = .systemFont(ofSize: 20, weight: .medium)
         lapLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(80)
+            $0.leading.equalToSuperview().offset(70)
             $0.centerY.equalToSuperview()
         }
 
         lapTimeLabel.font = .systemFont(ofSize: 20, weight: .regular)
         lapTimeLabel.textAlignment = .center
         lapTimeLabel.snp.makeConstraints {
-            $0.leading.equalTo(lapLabel).offset(85)
+            $0.leading.equalTo(lapLabel).offset(110)
             $0.centerY.equalToSuperview()
         }
 
