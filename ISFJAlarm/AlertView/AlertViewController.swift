@@ -17,6 +17,7 @@ import AVKit
 
 protocol AlertViewControllerDelegate: AnyObject {
     func alertViewControllerDidDismiss()
+    func alertViewControllerDidRequestSnooze(minutes: Int)
 }
 
 /// 알람 화면을 담당하는 뷰 컨트롤러
@@ -101,8 +102,12 @@ class AlertViewController: UIViewController {
     }
 
     /// 다시 알림 버튼 클릭 시 동작
+    // snoozeAlarm 메서드 수정
     @objc private func snoozeAlarm() {
         print("\(snoozeTime)분 후 다시 알림이 설정되었습니다.")
+        delegate?.alertViewControllerDidRequestSnooze(minutes: snoozeTime)
+        player?.pause()
+        dismiss(animated: true, completion: nil)
     }
 
     /// 마이너스 버튼 클릭 시 동작

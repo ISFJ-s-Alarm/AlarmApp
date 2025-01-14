@@ -460,6 +460,10 @@ extension TimerView: AlertViewControllerDelegate {
     func alertViewControllerDidDismiss() {
         viewModel.stopTimerAndAudio()
     }
+    
+    func alertViewControllerDidRequestSnooze(minutes: Int) {
+        viewModel.setSnoozeTimer(snoozeMinutes: minutes)
+    }
 }
 
 // MARK: - SwiftUI Preview

@@ -206,3 +206,18 @@ extension TimerViewModel {
         audioPlayer = nil
     }
 }
+
+extension TimerViewModel {
+    func setSnoozeTimer(snoozeMinutes: Int) {
+        // 기존 타이머 정보 초기화
+        stopTimerAndAudio()
+        
+        // 새로운 타이머 설정 (분 단위)
+        hours = 0
+        minutes = snoozeMinutes
+        seconds = 0
+        
+        // 타이머 시작
+        startTimer(withName: "다시 알림")
+    }
+}
