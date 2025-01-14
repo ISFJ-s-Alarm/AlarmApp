@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 
         //window에게 루트 뷰 컨트롤러 지정.
         //window.rootViewController = AlertViewController() // AlertViewController를 초기 화면으로 설정
-        window.rootViewController = UINavigationController(rootViewController: CustomTabBarController())
+        window.rootViewController = CustomTabBarController()
         //이 메서드를 반드시 작성해줘야만 윈도우가 활성화 됨
         window.makeKeyAndVisible()
                 
