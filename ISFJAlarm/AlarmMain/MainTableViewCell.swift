@@ -47,19 +47,6 @@ class MainTableViewCell: UITableViewCell {
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(10)
         }
-        
-       
-        
-//        // StackView
-//        let stackView = UIStackView(arrangedSubviews: [timeLabel, memoLabel, onOffSwitch])
-//        super.init(style: style, reuseIdentifier: reuseIdentifier)
-//        contentView.addSubview(stackView)
-//        stackView.axis = .horizontal
-//        stackView.spacing = 100
-//        stackView.alignment = .center
-//        stackView.snp.makeConstraints {
-//            $0.edges.equalToSuperview().inset(10)
-//        }
       
         // 온오프 토글버튼 클릭 시
         onOffSwitch.addTarget(self, action: #selector(toggleSwitch), for: .touchUpInside)

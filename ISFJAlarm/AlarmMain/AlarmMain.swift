@@ -169,6 +169,3 @@ extension ViewController: UITableViewDelegate {
         present(navi, animated: true, completion: nil)
     }
 }
-    
-// 시스템이 들어간 색들은, 다크모드 대응해줌
-
