@@ -12,9 +12,9 @@ class CustomTabBarController: UIViewController {
     private let tabBarView = CustomTabBarView() // 커스텀 탭 바
 
     // 화면별 뷰 컨트롤러
-    private let timerVC = TimerView()
-    private let stopwatchVC = StopwatchViewController()
-    private let alarmVC = ViewController()
+    private let timerVC = UINavigationController(rootViewController: TimerView())
+    private let stopwatchVC = UINavigationController(rootViewController: StopwatchViewController())
+    private let alarmVC = UINavigationController(rootViewController: ViewController())
 
     // 현재 활성화된 뷰 컨트롤러
     private var currentViewController: UIViewController?

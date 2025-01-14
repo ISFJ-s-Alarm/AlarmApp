@@ -14,7 +14,7 @@ import Then
 
 class ViewController: UIViewController {
 
-    
+    private let viewModel = AlarmMainViewModel()
     //MARK: UI요소
     //알람 Label
     private let alarmLabel = UILabel().then {
@@ -26,12 +26,13 @@ class ViewController: UIViewController {
     //TableView
     private let tableView = UITableView().then {
         $0.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.identifier)
-        $0.rowHeight = 90
+        $0.rowHeight = 100
         $0.separatorStyle = .none
-        $0.backgroundColor = .systemBackground
+        $0.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
     }
     
-    private var alarms: [Alarm] = []
+    var alarms: [Alarm] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -39,8 +40,10 @@ class ViewController: UIViewController {
         alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
         
         tableView.register(MainTableViewCell.self,forCellReuseIdentifier: MainTableViewCell.identifier)
-        tableView.reloadData()
+        
     }
+    
+
     
     //MARK: navigationBar
     private func navigationBar() {
@@ -50,7 +53,7 @@ class ViewController: UIViewController {
         //타이틀 폰트 크기 및 색상 설정
         let leftAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 20), // 폰트 크기 설정
-            .foregroundColor: UIColor.systemGreen         // 텍스트 색상 설정
+            .foregroundColor: UIColor(red: 72/255, green: 144/255, blue: 216/255, alpha: 1) // 텍스트 색상 설정
         ]
         editBtn.setTitleTextAttributes(leftAttributes, for: .normal)
         navigationItem.leftBarButtonItem = editBtn
@@ -60,7 +63,7 @@ class ViewController: UIViewController {
         //타이틀 폰트 크기 및 색상 설정
         let rightAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 30), // 폰트 크기 설정
-            .foregroundColor: UIColor.systemGreen         // 텍스트 색상 설정
+            .foregroundColor: UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1) // 텍스트 색상 설정
         ]
         addBtn.setTitleTextAttributes(rightAttributes, for: .normal)
         navigationItem.rightBarButtonItem = addBtn
@@ -71,7 +74,7 @@ class ViewController: UIViewController {
     private func configureUI() {
         
         navigationBar() // 네비게이션 바
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         
         //알람 Label
         view.addSubview(alarmLabel)
@@ -90,12 +93,20 @@ class ViewController: UIViewController {
         tableView.delegate = self
         
     }
+    
 
     //MARK: Button Actions
     //알람 추가 뷰로 이동
     @objc
     private func addBtnTapped() {
-        let addAlarm = UINavigationController(rootViewController: AlarmEditorViewController())
+        let vc = AlarmEditorViewController()
+        vc.onSaved = { [weak self] in
+            self?.alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+            DispatchQueue.main.async { //UI를 리로드할때는 항상 메인 스레드에서 실행해야함
+                self?.tableView.reloadData()
+            }
+        }
+        let addAlarm = UINavigationController(rootViewController: vc)
         present(addAlarm, animated: true, completion: nil)
     }
     //알람 편집 부분 추가 구현 필요함.
@@ -106,6 +117,7 @@ class ViewController: UIViewController {
     }
 
 }
+
 
 //MARK: TableView
 extension ViewController: UITableViewDataSource {
@@ -121,15 +133,30 @@ extension ViewController: UITableViewDataSource {
         dateFormatter.timeZone = TimeZone.current
         
         let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as! MainTableViewCell
+        cell.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1) // 셀 색상 설정
         let alarm = alarms[indexPath.row]
         guard let time = alarm.time else {
             return cell
         }
-        print("시간 : \(dateFormatter.string(from: time))")
         let label = alarm.label ?? "No Label"
+        print("time: \(dateFormatter.string(from: time)) | label: \(label)") // 확인용 print문
         cell.configureCell(with: dateFormatter.string(from: time), label: label)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] (_, _, completion) in
+            self?.viewModel.deleteAlarm(at: indexPath.row)
+            completion(true)
+        }
+        self.viewModel.onDeleted = { [weak self] in
+            self?.alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+            DispatchQueue.main.async { //UI를 리로드할때는 항상 메인 스레드에서 실행해야함
+                self?.tableView.reloadData()
+            }
+        }
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 
