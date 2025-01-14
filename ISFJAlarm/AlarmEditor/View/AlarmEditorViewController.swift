@@ -17,6 +17,8 @@ class AlarmEditorViewController: UIViewController {
     private var labelText: String?
     private var labelTextField: UITextField?
     
+    var onSaved: (() -> Void) = { }
+    
     // 기본 초기화 (새 알람 추가)
     init() {
         self.viewModel = AlarmEditorViewModel()
@@ -25,13 +27,14 @@ class AlarmEditorViewController: UIViewController {
     
     // 기존 알람 편집을 위한 초기화
     init(alarm: Alarm) {
-        self.viewModel = AlarmEditorViewModel(alarm: alarm)
+        self.viewModel = AlarmEditorViewModel(alarm: alarm) // 기존 알람 전달
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     override func loadView() {
         view = alarmEditView
@@ -48,11 +51,16 @@ class AlarmEditorViewController: UIViewController {
         alarmEditView.tableView.delegate = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
+    }
+    
     // MARK: - Functions
     private func backButtonSetupUI() {
         let backBarButton = UIBarButtonItem(title: "뒤로", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backBarButton
-        navigationController?.navigationBar.tintColor = .orange
+        navigationController?.navigationBar.tintColor = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
     }
     
     private func setupBindings() {
@@ -68,9 +76,15 @@ class AlarmEditorViewController: UIViewController {
     }
     
     private func setupInitialState() {
+        
+        if viewModel.isEditing {
+            alarmEditView.updateTitle(isEditing: true) // "알람 편집"으로 변경
+        } else {
+            alarmEditView.updateTitle(isEditing: false) // "알람 추가"로 설정
+        }
+        
         // TimePicker 초기값 설정
         alarmEditView.timePicker.date = viewModel.getTime()
-        alarmEditView.timePicker.addTarget(self, action: #selector(timeChanged(_:)), for: .valueChanged)
         
         // 기존 데이터가 있다면 selectedDays 설정
         selectedDays = viewModel.getSelectedDays()
@@ -125,14 +139,11 @@ class AlarmEditorViewController: UIViewController {
             print("------------------------")
         }
 
+        onSaved()
         dismiss(animated: true)
     }
     
     @objc private func timePickerValueChanged(_ sender: UIDatePicker) {
-        viewModel.setTime(sender.date)
-    }
-    
-    @objc private func timeChanged(_ sender: UIDatePicker) {
         viewModel.setTime(sender.date)
     }
     
@@ -150,7 +161,7 @@ extension AlarmEditorViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
-        cell.backgroundColor = .darkGray
+        cell.backgroundColor = .clear
         cell.accessoryView = nil
         cell.accessoryType = .none
         
@@ -228,6 +239,7 @@ extension AlarmEditorViewController: UITableViewDataSource {
             cell.textLabel?.text = "다시 알림"
             let switchControl = UISwitch()
             switchControl.isOn = viewModel.getReminderStatus()
+            switchControl.onTintColor = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
             switchControl.addTarget(self, action: #selector(reminderSwitchChanged(_:)), for: .valueChanged)
             cell.accessoryView = switchControl
         default:

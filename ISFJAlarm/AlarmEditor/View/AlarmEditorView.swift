@@ -22,14 +22,14 @@ class AlarmEditorView: UIView {
     let cancelButton: UIButton = {
         let button = UIButton()
         button.setTitle("취소", for: .normal)
-        button.setTitleColor(.orange, for: .normal)
+        button.setTitleColor(UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1), for: .normal)
         return button
     }()
     
     let saveButton: UIButton = {
         let button = UIButton()
         button.setTitle("저장", for: .normal)
-        button.setTitleColor(.orange, for: .normal)
+        button.setTitleColor(UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1), for: .normal)
         return button
     }()
     
@@ -47,7 +47,7 @@ class AlarmEditorView: UIView {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.separatorStyle = .singleLine
-        tableView.backgroundColor = .darkGray
+        tableView.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true
         return tableView
@@ -56,7 +56,7 @@ class AlarmEditorView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .black
+        self.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         configureUI()
     }
     
@@ -65,6 +65,7 @@ class AlarmEditorView: UIView {
     }
     
     private func configureUI() {
+        
         [titleLabel, cancelButton, saveButton, timePicker, tableView]
             .forEach { addSubview($0) }
         
@@ -106,7 +107,6 @@ extension AlarmEditorView {
     func configure(with alarm: Alarm?) {
         if let alarm = alarm {
             timePicker.date = alarm.time ?? Date()
-            // 기타 UI 업데이트
         }
     }
 }

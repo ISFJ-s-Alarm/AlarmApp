@@ -14,6 +14,7 @@ class AlarmEditorViewModel {
     var isEditing: Bool {
         return existingAlarm != nil
     }
+    
     var existingAlarm: Alarm?
     
     var updateUI: (() -> Void)?
