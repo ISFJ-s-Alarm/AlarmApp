@@ -23,7 +23,7 @@ class AlarmEditorViewModel {
     private var selectedDays: Set<Int>
     private var label: String
     private var sound: String
-    private var reminder: Bool
+    var reminder: Bool
     
     init(alarm: Alarm? = nil) {
         if let alarm = alarm {

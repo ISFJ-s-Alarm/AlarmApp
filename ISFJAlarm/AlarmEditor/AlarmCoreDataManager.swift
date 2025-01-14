@@ -98,4 +98,18 @@ class AlarmCoreDataManager {
             return []
         }
     }
+    
+    // MARK: - Fetch Alarms by Time Range (추가)
+    func fetchAlarms(by timeRange: Date) -> [Alarm] {
+        let fetchRequest: NSFetchRequest<Alarm> = Alarm.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "time == %@", timeRange as CVarArg)
+        
+        do {
+            let alarms = try context.fetch(fetchRequest)
+            return alarms
+        } catch {
+            print("Failed to fetch alarms by time range: \(error)")
+            return []
+        }
+    }
 }
