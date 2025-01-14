@@ -39,6 +39,11 @@ class TimerTableViewCell: UITableViewCell {
         backgroundColor = .clear
         contentView.addSubview(nameLabel)
         contentView.addSubview(timeLabel)
+        contentView.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
+        contentView.layer.cornerRadius = 10
+        
+        // 셀 간격을 위한 inset 설정
+        self.contentView.frame = self.contentView.frame.inset(by: UIEdgeInsets(top: 5, left: 0, bottom: 5, right: 0))
         
         nameLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
