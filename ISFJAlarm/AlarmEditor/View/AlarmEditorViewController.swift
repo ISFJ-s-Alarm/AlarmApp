@@ -107,15 +107,24 @@ class AlarmEditorViewController: UIViewController {
     
     @objc private func saveButtonTapped() {
         viewModel.setTime(alarmEditView.timePicker.date)
-        
+
         let saveResult = viewModel.saveAlarm()
         print("알람 \(viewModel.isEditing ? "수정" : "저장") 결과: \(saveResult)")
-        
+
+        if saveResult {
+            // 저장 성공 시 AlertViewController로 데이터 전달
+            let alertVC = AlertViewController()
+            alertVC.reminderEnabled = viewModel.reminder // "다시 알림" 상태 전달
+        } else {
+            print("알람 저장 실패")
+        }
+
+        // Debugging: 저장된 알람 출력
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         dateFormatter.timeZone = TimeZone.current
-        
+
         let allAlarms = AlarmCoreDataManager.shared.fetchAllAlarms()
         print("현재 저장된 모든 알람:")
         allAlarms.forEach { alarm in
@@ -128,6 +137,7 @@ class AlarmEditorViewController: UIViewController {
             print("다시 알림: \(alarm.reminder)")
             print("------------------------")
         }
+
         onSaved()
         dismiss(animated: true)
     }
