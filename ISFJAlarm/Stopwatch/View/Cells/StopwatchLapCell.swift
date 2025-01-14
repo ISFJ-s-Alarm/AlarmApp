@@ -36,27 +36,28 @@ class StopwatchLapCell: UITableViewCell {
 
         lapLabel.font = .systemFont(ofSize: 20, weight: .medium)
         lapLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
+            $0.leading.equalToSuperview().offset(70)
             $0.centerY.equalToSuperview()
         }
 
         lapTimeLabel.font = .systemFont(ofSize: 20, weight: .regular)
         lapTimeLabel.textAlignment = .center
         lapTimeLabel.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.leading.equalTo(lapLabel).offset(110)
+            $0.centerY.equalToSuperview()
         }
 
         totalTimeLabel.font = .systemFont(ofSize: 20, weight: .regular)
         totalTimeLabel.textAlignment = .right
         totalTimeLabel.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-16)
+            $0.leading.equalTo(lapTimeLabel).offset(130)
             $0.centerY.equalToSuperview()
         }
     }
 
     /// 데이터 설정
     func configure(with lap: StopwatchLap) {
-        lapLabel.text = "랩 \(lap.lapNumber)"
+        lapLabel.text = "\(lap.lapNumber)"
         lapTimeLabel.text = lap.lapTime
         totalTimeLabel.text = lap.totalTime
     }
