@@ -20,7 +20,7 @@ class ViewController: UIViewController {
     private let alarmLabel = UILabel().then {
         $0.text = "알람"
         $0.textAlignment = .left
-        $0.textColor = .label
+        $0.textColor = .white
         $0.font = UIFont.boldSystemFont(ofSize: 50)
     }
     //TableView
