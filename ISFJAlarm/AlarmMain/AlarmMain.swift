@@ -29,8 +29,6 @@ class ViewController: UIViewController {
         $0.separatorStyle = .none
         $0.backgroundColor = .systemBackground
     }
-    //TableView 테스트를 위한 MockData
-    private let mockData = ["A", "B", "C", "D", "E", "A", "B", "C", "D", "E", "A", "B", "C", "D", "E"]
     
     private var alarms: [Alarm] = []
     override func viewDidLoad() {
@@ -96,13 +94,13 @@ class ViewController: UIViewController {
     //알람 추가 뷰로 이동
     @objc
     private func addBtnTapped() {
-        let addAlarm = AlarmEditorViewController()
+        let addAlarm = UINavigationController(rootViewController: AlarmEditorViewController())
         present(addAlarm, animated: true, completion: nil)
     }
     //알람 편집 부분 추가 구현 필요함.
     @objc
     private func editBtnTapped() {
-        let editAlarm = AlarmEditorViewController()
+        let editAlarm = UINavigationController(rootViewController: AlarmEditorViewController())
         present(editAlarm, animated: true, completion: nil)
     }
 
@@ -131,13 +129,6 @@ extension ViewController: UITableViewDataSource {
         cell.configureCell(with: dateFormatter.string(from: time), label: label)
         
         return cell
-        //    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //        guard let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as? MainTableViewCell else {
-        //            return UITableViewCell()
-        //        }
-        //        cell.configureCell(with: mockData[indexPath.row])
-        //        return cell
-        //    }
     }
 //    //MARK: Cell Click시 액션
 //    //알람 추가 뷰로 이동
