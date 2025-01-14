@@ -25,14 +25,14 @@ class CustomTabBarView: UIView {
     }
 
     private func setupUI() {
-        self.backgroundColor = .black
-        self.layer.cornerRadius = 25
+        self.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
+        self.layer.cornerRadius = 40
         self.layer.masksToBounds = true
 
         for (index, iconName) in icons.enumerated() {
             let backgroundView = UIView()
             backgroundView.backgroundColor = .clear
-            backgroundView.layer.cornerRadius = 25
+            backgroundView.layer.cornerRadius = 30
             self.insertSubview(backgroundView, at: 0)
             backgroundViews.append(backgroundView)
 
@@ -60,7 +60,7 @@ class CustomTabBarView: UIView {
             buttons[index].frame = buttonFrame
 
             // 버튼 배경 뷰는 정중앙에 위치하도록 설정
-            let size = buttonHeight * 0.6 // 원형 크기 비율 설정
+            let size = buttonHeight * 0.8 // 원형 크기 비율 설정
             backgroundViews[index].frame = CGRect(
                 x: buttonFrame.midX - size / 2,
                 y: buttonFrame.midY - size / 2,
@@ -79,7 +79,7 @@ class CustomTabBarView: UIView {
     private func updateButtonSelection(selectedIndex: Int) {
         for (index, button) in buttons.enumerated() {
             if index == selectedIndex {
-                backgroundViews[index].backgroundColor = UIColor.white
+                backgroundViews[index].backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
                 button.tintColor = .black
             } else {
                 backgroundViews[index].backgroundColor = .clear
