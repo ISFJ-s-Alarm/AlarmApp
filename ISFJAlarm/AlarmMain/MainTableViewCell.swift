@@ -45,7 +45,7 @@ class MainTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.addSubview(stackView)
         stackView.axis = .horizontal
-        stackView.spacing = 150
+        stackView.spacing = 100
         stackView.alignment = .center
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(10)
@@ -90,7 +90,7 @@ class MainTableViewCell: UITableViewCell {
             for timeNlabel in datas {
                 if let time = timeNlabel.time,
                    let label = timeNlabel.label {
-                    print("name: \(time), label: \(label)")
+                    print("time: \(time), label: \(label)")
                 }
             }
         } catch {
@@ -99,9 +99,9 @@ class MainTableViewCell: UITableViewCell {
     }
     
     // CoreData에서 받은 데이터 출력
-    func configureCell(with text: String) {
-        timeLabel.text = text
-        memoLabel.text = text
+    func configureCell(with time: String, label: String) {
+        timeLabel.text = time
+        memoLabel.text = label
     }
     
     @objc

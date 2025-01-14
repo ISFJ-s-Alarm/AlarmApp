@@ -6,13 +6,14 @@
 //
 
 import UIKit
+import CoreData
 
 import SnapKit
 import Then
 
+
 class ViewController: UIViewController {
 
-    
     //MARK: UI요소
     //알람 Label
     private let alarmLabel = UILabel().then {
@@ -31,12 +32,15 @@ class ViewController: UIViewController {
     //TableView 테스트를 위한 MockData
     private let mockData = ["A", "B", "C", "D", "E", "A", "B", "C", "D", "E", "A", "B", "C", "D", "E"]
     
-    
+    private var alarms: [Alarm] = []
     override func viewDidLoad() {
         super.viewDidLoad()
 
         configureUI()
+        alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
         
+        tableView.register(MainTableViewCell.self,forCellReuseIdentifier: MainTableViewCell.identifier)
+        tableView.reloadData()
     }
     
     //MARK: navigationBar
@@ -84,7 +88,7 @@ class ViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         tableView.dataSource = self
-        tableView.delegate = self
+        //tableView.delegate = self
         
     }
 
@@ -107,24 +111,42 @@ class ViewController: UIViewController {
 //MARK: TableView
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return mockData.count
+        return alarms.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as? MainTableViewCell else {
-            return UITableViewCell()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.timeZone = TimeZone.current
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as! MainTableViewCell
+        let alarm = alarms[indexPath.row]
+        guard let time = alarm.time else {
+            return cell
         }
-        cell.configureCell(with: mockData[indexPath.row])
+        print("시간 : \(dateFormatter.string(from: time))")
+        let label = alarm.label ?? "No Label"
+        cell.configureCell(with: dateFormatter.string(from: time), label: label)
+        
         return cell
+        //    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        //        guard let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as? MainTableViewCell else {
+        //            return UITableViewCell()
+        //        }
+        //        cell.configureCell(with: mockData[indexPath.row])
+        //        return cell
+        //    }
     }
+//    //MARK: Cell Click시 액션
+//    //알람 추가 뷰로 이동
+//    extension ViewController: UITableViewDelegate {
+//        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//            let cellClicked = AlarmEditorViewController()
+//            present(cellClicked, animated: true, completion: nil)
+//        }
+//    }
+    
+    // 시스템이 들어간 색들은, 다크모드 대응해줌
 }
-//MARK: Cell Click시 액션
-//알람 추가 뷰로 이동
-extension ViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cellClicked = AlarmEditorViewController()
-        present(cellClicked, animated: true, completion: nil)
-    }
-}
-
-// 시스템이 들어간 색들은, 다크모드 대응해줌
