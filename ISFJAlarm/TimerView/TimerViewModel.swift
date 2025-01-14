@@ -9,6 +9,14 @@ import Foundation
 import Combine
 import AVFoundation
 
+import Foundation
+import Combine
+import AVFoundation
+
+protocol TimerViewModelDelegate: AnyObject {
+    func showAlertViewController()
+}
+
 class TimerViewModel {
     // Published properties
     @Published var hours: Int = 0
@@ -17,11 +25,13 @@ class TimerViewModel {
     @Published var isRunning: Bool = false
     @Published var timerItems: [TimerModel] = []
     
-    // Private properties
+    // Properties
+    weak var delegate: TimerViewModelDelegate?
     private var timer: Timer?
     private let coreDataManager = TimerCoreDataManager.shared
     private var audioPlayer: AVAudioPlayer?
     private var selectedMusic: MusicModel?
+    
     func setSelectedMusic(_ music: MusicModel) {
         selectedMusic = music
     }
@@ -108,16 +118,21 @@ class TimerViewModel {
             seconds = 59
         } else {
             stopTimer()
-            playTimerEndMusic()  // 타이머 종료 시 음악 재생
+            playTimerEndMusic()  // 타이머 종료 시 음악 재생 및 알람 화면 표시
         }
     }
     
-    // 음악 재생 기능 추가
+    // 음악 재생 및 알람 화면 표시
     private func playTimerEndMusic() {
-        guard let music = selectedMusic, music.name != "무음" else { return }
+        guard let music = selectedMusic, music.name != "무음" else {
+            // 음악이 없더라도 알람 화면은 표시
+            delegate?.showAlertViewController()
+            return
+        }
         
         guard let path = Bundle.main.path(forResource: music.name, ofType: "mp3") else {
             print("음악 파일을 찾을 수 없습니다: \(music.name)")
+            delegate?.showAlertViewController()
             return
         }
         
@@ -130,12 +145,14 @@ class TimerViewModel {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
+            
+            // 음악 재생 후 알람 화면 표시
+            delegate?.showAlertViewController()
         } catch {
             print("음악 재생 실패: \(error.localizedDescription)")
+            delegate?.showAlertViewController()
         }
     }
-    
-    
     
     // MARK: - Data Operations
     func saveTimer(name: String) {
@@ -179,5 +196,13 @@ class TimerViewModel {
     // MARK: - Formatted Time
     var formattedTime: String {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+}
+
+extension TimerViewModel {
+    func stopTimerAndAudio() {
+        stopTimer()
+        audioPlayer?.stop()
+        audioPlayer = nil
     }
 }

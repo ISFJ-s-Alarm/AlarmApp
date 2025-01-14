@@ -38,6 +38,8 @@ class TimerView: UIViewController {
         configureUI()
         setupPickerView()
         setupBindings()
+        // viewModel.loadTimers()
+        viewModel.delegate = self  // 델리게이트 설정
         viewModel.loadTimers()
     }
 
@@ -441,6 +443,23 @@ extension TimerView: MusicSelectViewControllerDelegate {
        selectedMusicLabel.text = music.name
        viewModel.setSelectedMusic(music)
    }
+}
+
+extension TimerView: TimerViewModelDelegate {
+    func showAlertViewController() {
+        DispatchQueue.main.async { [weak self] in
+            let alertVC = AlertViewController()
+            alertVC.modalPresentationStyle = .fullScreen
+            alertVC.delegate = self
+            self?.present(alertVC, animated: true, completion: nil)
+        }
+    }
+}
+
+extension TimerView: AlertViewControllerDelegate {
+    func alertViewControllerDidDismiss() {
+        viewModel.stopTimerAndAudio()
+    }
 }
 
 // MARK: - SwiftUI Preview

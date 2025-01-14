@@ -5,16 +5,30 @@
 //  Created by Sol on 1/9/25.
 //
 
+//
+//  AlertViewController.swift
+//  ISFJAlarm
+//
+//  Created by Sol on 1/9/25.
+//
+
 import UIKit
 import AVKit
 
+protocol AlertViewControllerDelegate: AnyObject {
+    func alertViewControllerDidDismiss()
+}
+
 /// 알람 화면을 담당하는 뷰 컨트롤러
 class AlertViewController: UIViewController {
+    // MARK: - Properties
     private let alertView = AlertView() // AlertView 인스턴스 생성
     var player: AVPlayer? // 동영상 재생을 위한 AVPlayer
     private var timer: Timer? // 시간 업데이트 타이머
     private var snoozeTime = 5 // 다시 알림 시간 (기본값: 5분)
+    weak var delegate: AlertViewControllerDelegate?
 
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -29,6 +43,7 @@ class AlertViewController: UIViewController {
         timer?.invalidate() // 화면이 사라질 때 타이머 종료
     }
 
+    // MARK: - Private Methods
     /// AlertView를 컨트롤러의 뷰에 추가
     private func setupAlertView() {
         view.addSubview(alertView)
@@ -65,16 +80,17 @@ class AlertViewController: UIViewController {
         alertView.dismissButton.addTarget(self, action: #selector(stopAlarm), for: .touchUpInside)
     }
 
-    /// 동영상 반복 재생
-    @objc private func loopVideo() {
-        player?.seek(to: .zero)
-        player?.play()
-    }
-
     /// 타이머 시작 및 시간 업데이트
     private func startTimer() {
         updateTime()
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+    }
+
+    // MARK: - @objc Methods
+    /// 동영상 반복 재생
+    @objc private func loopVideo() {
+        player?.seek(to: .zero)
+        player?.play()
     }
 
     /// 현재 시간을 업데이트하여 라벨에 표시
@@ -107,6 +123,7 @@ class AlertViewController: UIViewController {
     @objc private func stopAlarm() {
         print("중단 버튼 클릭됨!")
         player?.pause()
+        delegate?.alertViewControllerDidDismiss()  // 델리게이트 호출
         dismiss(animated: true, completion: nil)
     }
 }
