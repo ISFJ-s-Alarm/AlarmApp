@@ -49,6 +49,11 @@ class AlarmEditorViewController: UIViewController {
         
         alarmEditView.tableView.dataSource = self
         alarmEditView.tableView.delegate = self
+        
+        // 화면 어디든 터치하면 키보드가 내려감
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -107,10 +112,10 @@ class AlarmEditorViewController: UIViewController {
     
     @objc private func saveButtonTapped() {
         viewModel.setTime(alarmEditView.timePicker.date)
-
+        
         let saveResult = viewModel.saveAlarm()
         print("알람 \(viewModel.isEditing ? "수정" : "저장") 결과: \(saveResult)")
-
+        
         if saveResult {
             // 저장 성공 시 AlertViewController로 데이터 전달
             let alertVC = AlertViewController()
@@ -118,13 +123,13 @@ class AlarmEditorViewController: UIViewController {
         } else {
             print("알람 저장 실패")
         }
-
+        
         // Debugging: 저장된 알람 출력
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         dateFormatter.timeZone = TimeZone.current
-
+        
         let allAlarms = AlarmCoreDataManager.shared.fetchAllAlarms()
         print("현재 저장된 모든 알람:")
         allAlarms.forEach { alarm in
@@ -137,7 +142,7 @@ class AlarmEditorViewController: UIViewController {
             print("다시 알림: \(alarm.reminder)")
             print("------------------------")
         }
-
+        
         onSaved()
         dismiss(animated: true)
     }
@@ -146,8 +151,19 @@ class AlarmEditorViewController: UIViewController {
         viewModel.setTime(sender.date)
     }
     
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     @objc private func reminderSwitchChanged(_ sender: UISwitch) {
         viewModel.toggleReminder()
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        if textField.text?.isEmpty == true {
+            textField.text = ""
+            viewModel.setLabel("")
+        }
     }
 }
 
@@ -216,6 +232,13 @@ extension AlarmEditorViewController: UITableViewDataSource {
             textField.clearButtonMode = .whileEditing
             textField.textAlignment = .right
             textField.returnKeyType = .done
+            
+            // clearButton 이미지 색상 변경
+            if let clearButton = textField.value(forKey: "_clearButton") as? UIButton {
+                clearButton.setImage(clearButton.image(for: .normal)?.withTintColor(.lightGray, renderingMode: .alwaysOriginal), for: .normal)
+            }
+            
+            textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
             
             cell.contentView.addSubview(textField)
             textField.snp.makeConstraints {
@@ -286,10 +309,6 @@ extension AlarmEditorViewController: UITableViewDelegate {
             let soundVC = SoundViewController(selectedSound: viewModel.getSound())
             soundVC.delegate = self
             navigationController?.pushViewController(soundVC, animated: true)
-        case 3:
-            if let cell = tableView.cellForRow(at: indexPath), let switchControl = cell.accessoryView as? UISwitch {
-                // TODO: switchControl.isOn 상태 처리 로직
-            }
         default:
             break
         }
@@ -325,5 +344,22 @@ extension AlarmEditorViewController: SoundViewControllerDelegate {
     func didSelectSound(_ sound: String) {
         viewModel.setSound(sound)
         alarmEditView.tableView.reloadData()
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension AlarmEditorViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        // clearButton을 터치했을 때는 제스처 인식기 동작 무시
+        if let clearButton = labelTextField?.value(forKey: "_clearButton") as? UIButton,
+           touch.view == clearButton {
+            return false
+        }
+        
+        // 테이블뷰 터치 시 제스처 인식기 동작 무시
+        if touch.view?.isDescendant(of: alarmEditView.tableView) == true {
+            return false
+        }
+        return true
     }
 }
