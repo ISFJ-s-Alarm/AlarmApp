@@ -43,8 +43,6 @@ class ViewController: UIViewController {
         
     }
     
-
-    
     //MARK: navigationBar
     private func navigationBar() {
         
@@ -79,7 +77,7 @@ class ViewController: UIViewController {
         //알람 Label
         view.addSubview(alarmLabel)
         alarmLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(10)
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
         }
         //TableView
