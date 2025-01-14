@@ -95,7 +95,7 @@ class TimerView: UIViewController {
     }
 
     private func setupBasic() {
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         navigationController?.navigationBar.isHidden = true
     }
 
@@ -110,7 +110,7 @@ class TimerView: UIViewController {
         timerLabel.textAlignment = .center
 
         // 레이블 컨테이너 설정
-        labelContainerView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        labelContainerView.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
         labelContainerView.layer.cornerRadius = 8
         labelContainerView.clipsToBounds = true
 
@@ -151,14 +151,15 @@ class TimerView: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(musicLabelTapped))
         selectedMusicLabel.addGestureRecognizer(tapGesture)
         
-        musicContainerView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        musicContainerView.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
         musicContainerView.layer.cornerRadius = 8
         musicContainerView.clipsToBounds = true
         
         // 컨트롤 버튼 설정
         setupControlButton(resetButton, systemName: "arrow.counterclockwise")
         setupControlButton(playPauseButton, systemName: "play.fill")
-        playPauseButton.backgroundColor = .systemGreen
+        resetButton.backgroundColor = UIColor(red: 72/255, green: 144/255, blue: 216/255, alpha: 1)
+        playPauseButton.backgroundColor = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
         
         // 최근 항목 레이블 설정
         recentLabel.text = "최근 항목"
