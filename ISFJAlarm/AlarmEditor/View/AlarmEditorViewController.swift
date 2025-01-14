@@ -17,6 +17,8 @@ class AlarmEditorViewController: UIViewController {
     private var labelText: String?
     private var labelTextField: UITextField?
     
+    var onSaved: (() -> Void) = { }
+    
     // 기본 초기화 (새 알람 추가)
     init() {
         self.viewModel = AlarmEditorViewModel()
@@ -126,7 +128,7 @@ class AlarmEditorViewController: UIViewController {
             print("다시 알림: \(alarm.reminder)")
             print("------------------------")
         }
-        
+        onSaved()
         dismiss(animated: true)
     }
     
