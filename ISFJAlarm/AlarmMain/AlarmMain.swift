@@ -14,6 +14,7 @@ import Then
 
 class ViewController: UIViewController {
 
+    
     //MARK: UI요소
     //알람 Label
     private let alarmLabel = UILabel().then {
@@ -86,7 +87,7 @@ class ViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         tableView.dataSource = self
-        //tableView.delegate = self
+        tableView.delegate = self
         
     }
 
@@ -130,14 +131,17 @@ extension ViewController: UITableViewDataSource {
         
         return cell
     }
-//    //MARK: Cell Click시 액션
-//    //알람 추가 뷰로 이동
-//    extension ViewController: UITableViewDelegate {
-//        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//            let cellClicked = AlarmEditorViewController()
-//            present(cellClicked, animated: true, completion: nil)
-//        }
-//    }
-    
-    // 시스템이 들어간 색들은, 다크모드 대응해줌
 }
+
+//MARK: Cell Click시 액션
+//알람 추가 뷰로 이동
+extension ViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cellClicked = AlarmEditorViewController(alarm: alarms[indexPath.row])
+        let navi = UINavigationController(rootViewController: cellClicked)
+        present(navi, animated: true, completion: nil)
+    }
+}
+    
+// 시스템이 들어간 색들은, 다크모드 대응해줌
+
