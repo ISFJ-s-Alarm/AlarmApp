@@ -115,7 +115,6 @@ class AlarmEditorViewController: UIViewController {
             // 저장 성공 시 AlertViewController로 데이터 전달
             let alertVC = AlertViewController()
             alertVC.reminderEnabled = viewModel.reminder // "다시 알림" 상태 전달
-            present(alertVC, animated: true, completion: nil)
         } else {
             print("알람 저장 실패")
         }
