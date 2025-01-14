@@ -101,15 +101,15 @@ class StopwatchView: UIView, UITableViewDelegate, UITableViewDataSource {
         // 레이블 속성 설정
         lapLabel.text = "랩"
         lapLabel.textColor = .white
-        lapLabel.font = .systemFont(ofSize: 20, weight: .medium)
+        lapLabel.font = .systemFont(ofSize: 20, weight: .bold)
 
         lapTimeLabel.text = "랩 타임"
         lapTimeLabel.textColor = .white
-        lapTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        lapTimeLabel.font = .systemFont(ofSize: 18, weight: .bold)
 
         totalTimeLabel.text = "전체 시간"
         totalTimeLabel.textColor = .white
-        totalTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        totalTimeLabel.font = .systemFont(ofSize: 18, weight: .bold)
 
         // 헤더에 레이블 추가
         [lapLabel, lapTimeLabel, totalTimeLabel].forEach { headerView.addSubview($0) }
