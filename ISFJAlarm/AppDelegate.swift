@@ -14,6 +14,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        // CoreData 스택 초기화
+        _ = TimerCoreDataManager.shared.persistentContainer
         // Override point for customization after application launch.
         return true
     }

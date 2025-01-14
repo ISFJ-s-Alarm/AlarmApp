@@ -35,10 +35,11 @@ class RepeatViewController: UIViewController {
 
     // MARK: - Functions
     private func setupUI() {
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         
         title = "반복"
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
+        navigationController?.navigationBar.isHidden = false
         
         view.addSubview(tableView)
         tableView.snp.makeConstraints {
@@ -87,10 +88,9 @@ extension RepeatViewController: UITableViewDataSource {
         
         cell.textLabel?.text = days[indexPath.row]
         cell.textLabel?.textColor = .white
-        cell.backgroundColor = .darkGray
-        
+        cell.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
         cell.accessoryType = selectedDays.contains(indexPath.row) ? .checkmark : .none
-        cell.tintColor = .orange
+        cell.tintColor = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
         
         let backgroundView = UIView()
         backgroundView.backgroundColor = UIColor.darkGray.withAlphaComponent(0.7)
