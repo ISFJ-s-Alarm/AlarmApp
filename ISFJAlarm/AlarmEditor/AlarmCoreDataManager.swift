@@ -24,6 +24,7 @@ class AlarmCoreDataManager {
         alarm.label = label
         alarm.sound = sound
         alarm.reminder = reminder
+        alarm.isOn = true
         
         do {
             try context.save()
@@ -62,12 +63,13 @@ class AlarmCoreDataManager {
     }
     
     // MARK: - Update Alarm
-    func updateAlarm(_ alarm: Alarm, time: Date?, repeatDays: Set<Int>?, label: String?, sound: String?, reminder: Bool?) {
+    func updateAlarm(_ alarm: Alarm, time: Date?, repeatDays: Set<Int>?, label: String?, sound: String?, reminder: Bool?, isOn: Bool?) {
         if let time = time { alarm.time = time }
         if let repeatDays = repeatDays { alarm.repeatDays = (try? JSONEncoder().encode(Array(repeatDays))) ?? Data() }
         if let label = label { alarm.label = label }
         if let sound = sound { alarm.sound = sound }
         if let reminder = reminder { alarm.reminder = reminder }
+        if let isOn = isOn { alarm.isOn = isOn }
         
         do {
             try context.save()
