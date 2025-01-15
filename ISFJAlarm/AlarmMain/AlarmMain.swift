@@ -64,16 +64,6 @@ class ViewController: UIViewController {
     //MARK: navigationBar
     private func navigationBar() {
         
-        //편집버튼 설정
-        let editBtn = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editBtnTapped))
-        //타이틀 폰트 크기 및 색상 설정
-        let leftAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 20), // 폰트 크기 설정
-            .foregroundColor: UIColor(red: 72/255, green: 144/255, blue: 216/255, alpha: 1) // 텍스트 색상 설정
-        ]
-        editBtn.setTitleTextAttributes(leftAttributes, for: .normal)
-        navigationItem.leftBarButtonItem = editBtn
-        
         //+버튼 설정
         let addBtn = UIBarButtonItem(title: "+", style: .plain, target: self, action: #selector(addBtnTapped))
         //타이틀 폰트 크기 및 색상 설정
@@ -200,12 +190,6 @@ class ViewController: UIViewController {
         }
         let addAlarm = UINavigationController(rootViewController: vc)
         present(addAlarm, animated: true, completion: nil)
-    }
-    //알람 편집 부분 추가 구현 필요함.
-    @objc
-    private func editBtnTapped() {
-        let editAlarm = UINavigationController(rootViewController: AlarmEditorViewController())
-        present(editAlarm, animated: true, completion: nil)
     }
 
 }
