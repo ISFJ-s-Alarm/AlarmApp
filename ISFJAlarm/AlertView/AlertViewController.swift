@@ -149,12 +149,14 @@ class AlertViewController: UIViewController {
     @objc private func decreaseSnoozeTime() {
         if snoozeTime > 1 {
             snoozeTime -= 5
+            alertView.snoozeTimeLabel.text = "\(snoozeTime)분"
             print("다시 알림 시간 감소: \(snoozeTime)분")
         }
     }
 
     @objc private func increaseSnoozeTime() {
         snoozeTime += 5
+        alertView.snoozeTimeLabel.text = "\(snoozeTime)분"
         print("다시 알림 시간 증가: \(snoozeTime)분")
     }
     
