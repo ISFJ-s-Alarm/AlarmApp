@@ -102,7 +102,8 @@ class AlarmEditorViewModel {
                 repeatDays: selectedDays,
                 label: label,
                 sound: sound,
-                reminder: reminder
+                reminder: reminder,
+                isOn: existingAlarm.isOn  // isOn 파라미터 추가
             )
             return true
         } else {

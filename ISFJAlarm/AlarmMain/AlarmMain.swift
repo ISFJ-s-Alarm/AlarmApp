@@ -14,7 +14,11 @@ import Then
 
 class ViewController: UIViewController {
 
+    private static var lastMinute = -1
+    
     private let viewModel = AlarmMainViewModel()
+    private var timer: Timer?  // timer 프로퍼티 추가
+    
     //MARK: UI요소
     //알람 Label
     private let alarmLabel = UILabel().then {
@@ -35,13 +39,27 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        print("📱 ViewController가 로드됨")
         configureUI()
         alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+        print("⏰ 총 알람 개수: \(alarms.count)")
         
-        tableView.register(MainTableViewCell.self,forCellReuseIdentifier: MainTableViewCell.identifier)
-        
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.identifier)
+        startAlarmTimer()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // 화면이 나타날 때마다 타이머 재시작
+        startAlarmTimer()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        timer?.invalidate()
+        timer = nil  // 타이머 완전 해제
+    }
+
     
     //MARK: navigationBar
     private func navigationBar() {
@@ -68,6 +86,14 @@ class ViewController: UIViewController {
         
     }
     
+    private func startAlarmTimer() {
+        print("⏰ 알람 타이머 시작")
+        // RunLoop.main에 타이머 추가하여 백그라운드에서도 동작하도록 설정
+        timer = Timer(timeInterval: 1, target: self, selector: #selector(checkAlarms), userInfo: nil, repeats: true)
+        RunLoop.main.add(timer!, forMode: .common)
+        print("⏰ 타이머 설정 완료")
+    }
+    
     //MARK: UI 정의 (네비게이션 바 포함)
     private func configureUI() {
         
@@ -90,6 +116,74 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
+    }
+    
+    @objc private func checkAlarms() {
+        let now = Date()
+        let calendar = Calendar.current
+        
+        let nowHour = calendar.component(.hour, from: now)
+        let nowMinute = calendar.component(.minute, from: now)
+        let nowSecond = calendar.component(.second, from: now)
+        
+        // 매번 알람 목록 새로 로드
+        alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+        
+        // 로그는 1분에 한 번만
+        if nowSecond == 0 {
+            print("\n🕒 현재 시각: \(String(format: "%02d:%02d:%02d", nowHour, nowMinute, nowSecond))")
+            print("\n📱 활성화된 알람 목록:")
+            for alarm in alarms where alarm.isOn {
+                guard let alarmTime = alarm.time else { continue }
+                let alarmHour = calendar.component(.hour, from: alarmTime)
+                let alarmMinute = calendar.component(.minute, from: alarmTime)
+                print("- \(String(format: "%02d:%02d", alarmHour, alarmMinute)) (\(alarm.sound ?? "무음"))")
+            }
+        }
+        
+        // 모든 알람 체크
+        for alarm in alarms {
+            guard let alarmTime = alarm.time,
+                  alarm.isOn else { continue }
+            
+            let alarmHour = calendar.component(.hour, from: alarmTime)
+            let alarmMinute = calendar.component(.minute, from: alarmTime)
+            
+            // 정각에 한 번만 알람이 울리도록
+            if nowHour == alarmHour &&
+               nowMinute == alarmMinute &&
+               nowSecond == 0 {
+                
+                print("\n🔔 알람 발생!")
+                print("시간: \(String(format: "%02d:%02d", alarmHour, alarmMinute))")
+                print("소리: \(alarm.sound ?? "무음")")
+                
+                DispatchQueue.main.async { [weak self] in
+                    if self?.presentedViewController == nil {
+                        self?.showAlertView(for: alarm)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func showAlertView(for alarm: Alarm) {
+        print("\n💡 알람 화면 표시 시작")
+        print("- 소리: \(alarm.sound ?? "없음")")
+        print("- 다시 알림: \(alarm.reminder)")
+        
+        let alertVC = AlertViewController()
+        alertVC.reminderEnabled = alarm.reminder
+        alertVC.selectedSound = alarm.sound
+        alertVC.modalPresentationStyle = .fullScreen
+        
+        // 알람이 여러 번 표시되는 것을 방지
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.presentedViewController == nil {
+                self.present(alertVC, animated: true)
+            }
+        }
     }
     
 
@@ -124,22 +218,10 @@ extension ViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.timeZone = TimeZone.current
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.identifier, for: indexPath) as! MainTableViewCell
-        cell.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1) // 셀 색상 설정
+        cell.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         let alarm = alarms[indexPath.row]
-        guard let time = alarm.time else {
-            return cell
-        }
-        let label = alarm.label ?? "No Label"
-        print("time: \(dateFormatter.string(from: time)) | label: \(label)") // 확인용 print문
-        cell.configureCell(with: dateFormatter.string(from: time), label: label)
-        
+        cell.configureCell(with: alarm)
         return cell
     }
     
@@ -163,6 +245,13 @@ extension ViewController: UITableViewDataSource {
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cellClicked = AlarmEditorViewController(alarm: alarms[indexPath.row])
+        // 수정 완료 후 콜백 추가
+        cellClicked.onSaved = { [weak self] in
+            self?.alarms = AlarmCoreDataManager.shared.fetchAllAlarms()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
         let navi = UINavigationController(rootViewController: cellClicked)
         present(navi, animated: true, completion: nil)
     }
