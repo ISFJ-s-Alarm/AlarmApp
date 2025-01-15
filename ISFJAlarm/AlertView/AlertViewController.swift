@@ -85,6 +85,7 @@ class AlertViewController: UIViewController {
         alertView.snoozeButton.isHidden = !reminderEnabled
         alertView.minusButton.isHidden = !reminderEnabled
         alertView.plusButton.isHidden = !reminderEnabled
+        alertView.snoozeTimeLabel.isHidden = !reminderEnabled // 라벨 표시 조건 추가
     }
     
     // 알람 소리 재생을 위한 새로운 함수
