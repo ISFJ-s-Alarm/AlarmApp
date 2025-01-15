@@ -44,6 +44,15 @@ class AlertView: UIView {
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         $0.layer.cornerRadius = 25
     }
+    
+    // 현재 설정된 다시 알림 시간을 표시하는 라벨
+    let snoozeTimeLabel = UILabel().then {
+        $0.textColor = .white
+        $0.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        $0.textAlignment = .center
+        $0.text = "5분" // 초기값 설정
+        $0.isHidden = true // 초기에는 숨김 처리
+    }
 
     // 알람 종료 버튼
     let dismissButton = UIButton().then {
@@ -66,7 +75,7 @@ class AlertView: UIView {
 
     /// UI 요소 배치 및 제약 조건 설정
     private func setupUI() {
-        [timeLabel, minusButton, plusButton, snoozeButton, dismissButton].forEach { addSubview($0) }
+        [timeLabel, minusButton, plusButton, snoozeButton, dismissButton, snoozeTimeLabel].forEach { addSubview($0) }
 
         timeLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
@@ -97,6 +106,11 @@ class AlertView: UIView {
             $0.bottom.equalToSuperview().offset(-40)
             $0.width.equalTo(100)
             $0.height.equalTo(40)
+        }
+        
+        snoozeTimeLabel.snp.makeConstraints {
+                $0.centerX.equalToSuperview()
+                $0.bottom.equalTo(snoozeButton.snp.top).offset(-10) // 다시 알림 버튼 위에 배치
         }
     }
 }
