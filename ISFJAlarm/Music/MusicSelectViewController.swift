@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import SnapKit
 
 protocol MusicSelectViewControllerDelegate: AnyObject {
     func didSelectMusic(_ music: MusicModel)
@@ -20,33 +21,45 @@ class MusicSelectViewController: UIViewController {
     private var musicList: [MusicModel] = []
     
     // MARK: - UI Components
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "알림음 선택"
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        return label
+    }()
+    
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .clear
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "MusicCell")
+        table.separatorStyle = .none
+        table.register(MusicSelectCell.self, forCellReuseIdentifier: "MusicCell")
         return table
     }()
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
         button.setTitle("취소", for: .normal)
-        button.setTitleColor(.orange, for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17)
         return button
     }()
     
     private lazy var settingButton: UIButton = {
         let button = UIButton()
         button.setTitle("설정", for: .normal)
-        button.setTitleColor(.orange, for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17)
         return button
     }()
     
     private lazy var silentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("실행 중단", for: .normal)
+        button.setTitle("무음", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .darkGray
-        button.layer.cornerRadius = 8
+        button.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
+        button.layer.cornerRadius = 10
+        button.titleLabel?.font = .systemFont(ofSize: 16)
         return button
     }()
     
@@ -59,16 +72,20 @@ class MusicSelectViewController: UIViewController {
     
     // MARK: - Private Methods
     private func setupUI() {
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 38/255, alpha: 1)
         
-        view.addSubview(cancelButton)
-        view.addSubview(settingButton)
-        view.addSubview(tableView)
-        view.addSubview(silentButton)
+        [cancelButton, settingButton, titleLabel, tableView, silentButton].forEach {
+            view.addSubview($0)
+        }
         
         cancelButton.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(20)
             make.leading.equalToSuperview().offset(20)
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.centerY.equalTo(cancelButton)
         }
         
         settingButton.snp.makeConstraints { make in
@@ -77,8 +94,8 @@ class MusicSelectViewController: UIViewController {
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(cancelButton.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview()
+            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalTo(silentButton.snp.top).offset(-20)
         }
         
@@ -97,7 +114,6 @@ class MusicSelectViewController: UIViewController {
     }
     
     private func loadMusicList() {
-        // 하드코딩된 음악 리스트 (실제로는 Bundle에서 로드)
         musicList = [
             MusicModel(name: "Adeles Oath Infinite", filename: "Adeles Oath Infinite.mp3", isSelected: false),
             MusicModel(name: "Life is Full of Happiness", filename: "Life is Full of Happiness.mp3", isSelected: false),
@@ -156,6 +172,69 @@ class MusicSelectViewController: UIViewController {
     }
 }
 
+// MARK: - MusicSelectCell
+class MusicSelectCell: UITableViewCell {
+    private let containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 0/255, green: 38/255, blue: 77/255, alpha: 1)
+        view.layer.cornerRadius = 10
+        return view
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    private let checkmarkImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.tintColor = .white
+        imageView.contentMode = .scaleAspectFit
+        imageView.image = UIImage(systemName: "checkmark")
+        return imageView
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupUI() {
+        backgroundColor = .clear
+        selectionStyle = .none
+        
+        contentView.addSubview(containerView)
+        containerView.addSubview(titleLabel)
+        containerView.addSubview(checkmarkImageView)
+        
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 5, left: 0, bottom: 5, right: 0))
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(20)
+            make.centerY.equalToSuperview()
+        }
+        
+        checkmarkImageView.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-20)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(20)
+        }
+    }
+    
+    func configure(with music: MusicModel) {
+        titleLabel.text = music.name
+        checkmarkImageView.isHidden = !music.isSelected
+    }
+}
+
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension MusicSelectViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -163,15 +242,16 @@ extension MusicSelectViewController: UITableViewDelegate, UITableViewDataSource 
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MusicCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MusicCell", for: indexPath) as? MusicSelectCell else {
+            return UITableViewCell()
+        }
         let music = musicList[indexPath.row]
-        
-        cell.textLabel?.text = music.name
-        cell.textLabel?.textColor = .white
-        cell.backgroundColor = .clear
-        cell.accessoryType = music.isSelected ? .checkmark : .none
-        
+        cell.configure(with: music)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 60
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
